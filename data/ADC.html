@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="w3.css">
+<script type="text/javascript" >
+///////////////////////////////////////////////////////////////////////////////////*** smoothie.js ***/
+(function(b){Date.now=Date.now||function(){return new Date().getTime()};var d={extend:function(){arguments[0]=arguments[0]||{};for(var f=1;f<arguments.length;f++){for(var e in arguments[f]){if(arguments[f].hasOwnProperty(e)){if(typeof(arguments[f][e])==="object"){if(arguments[f][e] instanceof Array){arguments[0][e]=arguments[f][e]}else{arguments[0][e]=d.extend(arguments[0][e],arguments[f][e])}}else{arguments[0][e]=arguments[f][e]}}}}return arguments[0]},binarySearch:function(i,h){var e=0,g=i.length;while(e<g){var f=(e+g)>>1;if(h<i[f][0]){g=f}else{e=f+1}}return e}};function a(e){this.options=d.extend({},a.defaultOptions,e);this.disabled=false;this.clear()}a.defaultOptions={resetBoundsInterval:3000,resetBounds:true};a.prototype.clear=function(){this.data=[];this.maxValue=Number.NaN;this.minValue=Number.NaN};a.prototype.resetBounds=function(){if(this.data.length){this.maxValue=this.data[0][1];this.minValue=this.data[0][1];for(var e=1;e<this.data.length;e++){var f=this.data[e][1];if(f>this.maxValue){this.maxValue=f}if(f<this.minValue){this.minValue=f}}}else{this.maxValue=Number.NaN;this.minValue=Number.NaN}};a.prototype.append=function(h,g,f){var e=this.data.length-1;while(e>=0&&this.data[e][0]>h){e--}if(e===-1){this.data.splice(0,0,[h,g])}else{if(this.data.length>0&&this.data[e][0]===h){if(f){this.data[e][1]+=g;g=this.data[e][1]}else{this.data[e][1]=g}}else{if(e<this.data.length-1){this.data.splice(e+1,0,[h,g])}else{this.data.push([h,g])}}}this.maxValue=isNaN(this.maxValue)?g:Math.max(this.maxValue,g);this.minValue=isNaN(this.minValue)?g:Math.min(this.minValue,g)};a.prototype.dropOldData=function(e,f){var g=0;while(this.data.length-g>=f&&this.data[g+1][0]<e){g++}if(g!==0){this.data.splice(0,g)}};function c(e){this.options=d.extend({},c.defaultChartOptions,e);this.seriesSet=[];this.currentValueRange=1;this.currentVisMinValue=0;this.lastRenderTimeMillis=0;this.lastChartTimestamp=0;this.mousemove=this.mousemove.bind(this);this.mouseout=this.mouseout.bind(this)}c.tooltipFormatter=function(k,j){var f=this.options.timestampFormatter||c.timeFormatter,e=[f(new Date(k))],g;for(var h=0;h<j.length;++h){g=j[h].series.options.tooltipLabel||"";if(g!==""){g=g+" "}e.push('<span style="color:'+j[h].series.options.strokeStyle+'">'+g+this.options.yMaxFormatter(j[h].value,this.options.labels.precision)+"</span>")}return e.join("<br>")};c.defaultChartOptions={millisPerPixel:20,enableDpiScaling:true,yMinFormatter:function(f,e){return parseFloat(f).toFixed(e)},yMaxFormatter:function(e,f){return parseFloat(e).toFixed(f)},yIntermediateFormatter:function(f,e){return parseFloat(f).toFixed(e)},maxValueScale:1,minValueScale:1,interpolation:"bezier",scaleSmoothing:0.125,maxDataSetLength:2,scrollBackwards:false,displayDataFromPercentile:1,grid:{fillStyle:"#000000",strokeStyle:"#777777",lineWidth:1,sharpLines:false,millisPerLine:1000,verticalSections:2,borderVisible:true},labels:{fillStyle:"#ffffff",disabled:false,fontSize:10,fontFamily:"monospace",precision:2,showIntermediateLabels:false,intermediateLabelSameAxis:true},title:{text:"",fillStyle:"#ffffff",fontSize:15,fontFamily:"monospace",verticalAlign:"middle"},horizontalLines:[],tooltip:false,tooltipLine:{lineWidth:1,strokeStyle:"#BBBBBB"},tooltipFormatter:c.tooltipFormatter,nonRealtimeData:false,responsive:false,limitFPS:0};c.AnimateCompatibility=(function(){var f=function(i,g){var h=window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(j){return window.setTimeout(function(){j(Date.now())},16)};return h.call(window,i,g)},e=function(h){var g=window.cancelAnimationFrame||function(i){clearTimeout(i)};return g.call(window,h)};return{requestAnimationFrame:f,cancelAnimationFrame:e}})();c.defaultSeriesPresentationOptions={lineWidth:1,strokeStyle:"#ffffff"};c.prototype.addTimeSeries=function(f,e){this.seriesSet.push({timeSeries:f,options:d.extend({},c.defaultSeriesPresentationOptions,e)});if(f.options.resetBounds&&f.options.resetBoundsInterval>0){f.resetBoundsTimerId=setInterval(function(){f.resetBounds()},f.options.resetBoundsInterval)}};c.prototype.removeTimeSeries=function(g){var f=this.seriesSet.length;for(var e=0;e<f;e++){if(this.seriesSet[e].timeSeries===g){this.seriesSet.splice(e,1);break}}if(g.resetBoundsTimerId){clearInterval(g.resetBoundsTimerId)}};c.prototype.getTimeSeriesOptions=function(g){var f=this.seriesSet.length;for(var e=0;e<f;e++){if(this.seriesSet[e].timeSeries===g){return this.seriesSet[e].options}}};c.prototype.bringToFront=function(g){var f=this.seriesSet.length;for(var e=0;e<f;e++){if(this.seriesSet[e].timeSeries===g){var h=this.seriesSet.splice(e,1);this.seriesSet.push(h[0]);break}}};c.prototype.streamTo=function(e,f){this.canvas=e;this.delay=f;this.start()};c.prototype.getTooltipEl=function(){if(!this.tooltipEl){this.tooltipEl=document.createElement("div");this.tooltipEl.className="smoothie-chart-tooltip";this.tooltipEl.style.position="absolute";this.tooltipEl.style.display="none";
+document.body.appendChild(this.tooltipEl)}return this.tooltipEl};c.prototype.updateTooltip=function(){var g=this.getTooltipEl();if(!this.mouseover||!this.options.tooltip){g.style.display="none";return}var j=this.lastChartTimestamp;var f=this.options.scrollBackwards?j-this.mouseX*this.options.millisPerPixel:j-(this.canvas.offsetWidth-this.mouseX)*this.options.millisPerPixel;var i=[];for(var k=0;k<this.seriesSet.length;k++){var h=this.seriesSet[k].timeSeries;if(h.disabled){continue}var e=d.binarySearch(h.data,f);if(e>0&&e<h.data.length){i.push({series:this.seriesSet[k],index:e,value:h.data[e][1]})}}if(i.length){g.innerHTML=this.options.tooltipFormatter.call(this,f,i);g.style.display="block"}else{g.style.display="none"}};c.prototype.mousemove=function(e){this.mouseover=true;this.mouseX=e.offsetX;this.mouseY=e.offsetY;this.mousePageX=e.pageX;this.mousePageY=e.pageY;var f=this.getTooltipEl();f.style.top=Math.round(this.mousePageY)+"px";f.style.left=Math.round(this.mousePageX)+"px";this.updateTooltip()};c.prototype.mouseout=function(){this.mouseover=false;this.mouseX=this.mouseY=-1;if(this.tooltipEl){this.tooltipEl.style.display="none"}};c.prototype.resize=function(){var g=!this.options.enableDpiScaling||!window?1:window.devicePixelRatio,f,e;if(this.options.responsive){f=this.canvas.offsetWidth;e=this.canvas.offsetHeight;if(f!==this.lastWidth){this.lastWidth=f;this.canvas.setAttribute("width",(Math.floor(f*g)).toString());this.canvas.getContext("2d").scale(g,g)}if(e!==this.lastHeight){this.lastHeight=e;this.canvas.setAttribute("height",(Math.floor(e*g)).toString());this.canvas.getContext("2d").scale(g,g)}}else{if(g!==1){f=parseInt(this.canvas.getAttribute("width"));e=parseInt(this.canvas.getAttribute("height"));if(!this.originalWidth||(Math.floor(this.originalWidth*g)!==f)){this.originalWidth=f;this.canvas.setAttribute("width",(Math.floor(f*g)).toString());this.canvas.style.width=f+"px";this.canvas.getContext("2d").scale(g,g)}if(!this.originalHeight||(Math.floor(this.originalHeight*g)!==e)){this.originalHeight=e;this.canvas.setAttribute("height",(Math.floor(e*g)).toString());this.canvas.style.height=e+"px";this.canvas.getContext("2d").scale(g,g)}}}};c.prototype.start=function(){if(this.frame){return}this.canvas.addEventListener("mousemove",this.mousemove);this.canvas.addEventListener("mouseout",this.mouseout);var e=function(){this.frame=c.AnimateCompatibility.requestAnimationFrame(function(){if(this.options.nonRealtimeData){var g=new Date(0);var f=this.seriesSet.reduce(function(h,j){var i=j.timeSeries.data;var l=Math.round(this.options.displayDataFromPercentile*i.length)-1;l=l>=0?l:0;l=l<=i.length-1?l:i.length-1;if(i&&i.length>0){var k=i[l][0];h=h>k?h:k}return h}.bind(this),g);this.render(this.canvas,f>g?f:null)}else{this.render()}e()}.bind(this))}.bind(this);e()};c.prototype.stop=function(){if(this.frame){c.AnimateCompatibility.cancelAnimationFrame(this.frame);delete this.frame;this.canvas.removeEventListener("mousemove",this.mousemove);this.canvas.removeEventListener("mouseout",this.mouseout)}};c.prototype.updateValueRange=function(){var g=this.options,j=Number.NaN,k=Number.NaN;for(var i=0;i<this.seriesSet.length;i++){var m=this.seriesSet[i].timeSeries;if(m.disabled){continue}if(!isNaN(m.maxValue)){j=!isNaN(j)?Math.max(j,m.maxValue):m.maxValue}if(!isNaN(m.minValue)){k=!isNaN(k)?Math.min(k,m.minValue):m.minValue}}if(g.maxValue!=null){j=g.maxValue}else{j*=g.maxValueScale}if(g.minValue!=null){k=g.minValue}else{k-=Math.abs(k*g.minValueScale-k)}if(this.options.yRangeFunction){var h=this.options.yRangeFunction({min:k,max:j});k=h.min;j=h.max}if(!isNaN(j)&&!isNaN(k)){var e=j-k;var f=(e-this.currentValueRange);var l=(k-this.currentVisMinValue);this.isAnimatingScale=Math.abs(f)>0.1||Math.abs(l)>0.1;this.currentValueRange+=g.scaleSmoothing*f;this.currentVisMinValue+=g.scaleSmoothing*l}this.valueRange={min:k,max:j}};c.prototype.render=function(n,M){var o=Date.now();if(this.options.limitFPS>0&&o-this.lastRenderTimeMillis<(1000/this.options.limitFPS)){return}if(!this.isAnimatingScale){var R=Math.min(1000/6,this.options.millisPerPixel);if(o-this.lastRenderTimeMillis<R){return}}this.resize();this.updateTooltip();this.lastRenderTimeMillis=o;n=n||this.canvas;M=M||o-(this.delay||0);M-=M%this.options.millisPerPixel;this.lastChartTimestamp=M;var X=n.getContext("2d"),V=this.options,J={top:0,left:0,width:n.clientWidth,height:n.clientHeight},A=M-(J.width*V.millisPerPixel),w=function(i){var t=i-this.currentVisMinValue;return this.currentValueRange===0?J.height:J.height-(Math.round((t/this.currentValueRange)*J.height))}.bind(this),B=function(i){if(V.scrollBackwards){return Math.round((M-i)/V.millisPerPixel)}return Math.round(J.width-((M-i)/V.millisPerPixel))};this.updateValueRange();X.font=V.labels.fontSize+"px "+V.labels.fontFamily;X.save();X.translate(J.left,J.top);X.beginPath();X.rect(0,0,J.width,J.height);X.clip();X.save();X.fillStyle=V.grid.fillStyle;X.clearRect(0,0,J.width,J.height);X.fillRect(0,0,J.width,J.height);X.restore();X.save();
+X.lineWidth=V.grid.lineWidth;X.strokeStyle=V.grid.strokeStyle;if(V.grid.millisPerLine>0){X.beginPath();for(var L=M-(M%V.grid.millisPerLine);L>=A;L-=V.grid.millisPerLine){var j=B(L);if(V.grid.sharpLines){j-=0.5}X.moveTo(j,0);X.lineTo(j,J.height)}X.stroke();X.closePath()}for(var K=1;K<V.grid.verticalSections;K++){var h=Math.round(K*J.height/V.grid.verticalSections);if(V.grid.sharpLines){h-=0.5}X.beginPath();X.moveTo(0,h);X.lineTo(J.width,h);X.stroke();X.closePath()}if(V.grid.borderVisible){X.beginPath();X.strokeRect(0,0,J.width,J.height);X.closePath()}X.restore();if(V.horizontalLines&&V.horizontalLines.length){for(var S=0;S<V.horizontalLines.length;S++){var p=V.horizontalLines[S],u=Math.round(w(p.value))-0.5;X.strokeStyle=p.color||"#ffffff";X.lineWidth=p.lineWidth||1;X.beginPath();X.moveTo(0,u);X.lineTo(J.width,u);X.stroke();X.closePath()}}for(var U=0;U<this.seriesSet.length;U++){X.save();var r=this.seriesSet[U].timeSeries;if(r.disabled){continue}var C=r.data,g=this.seriesSet[U].options;r.dropOldData(A,V.maxDataSetLength);X.lineWidth=g.lineWidth;X.strokeStyle=g.strokeStyle;X.beginPath();var E=0,D=0,m=0,k=0;for(var Q=0;Q<C.length&&C.length!==1;Q++){var I=B(C[Q][0]),H=w(C[Q][1]);if(Q===0){E=I;D=H;X.moveTo(I,H)}else{switch(V.interpolation){case"linear":case"line":X.lineTo(I,H);break;case"bezier":default:X.bezierCurveTo(Math.round((m+I)/2),k,Math.round((m+I))/2,H,I,H);break;case"step":X.lineTo(I,k);X.lineTo(I,H);break}}m=I;k=H}if(C.length>1){if(g.fillStyle){if(V.scrollBackwards){X.lineTo(m,J.height+g.lineWidth);X.lineTo(E,J.height+g.lineWidth);X.lineTo(E,D)}else{X.lineTo(J.width+g.lineWidth+1,k);X.lineTo(J.width+g.lineWidth+1,J.height+g.lineWidth+1);X.lineTo(E,J.height+g.lineWidth)}X.fillStyle=g.fillStyle;X.fill()}if(g.strokeStyle&&g.strokeStyle!=="none"){X.stroke()}X.closePath()}X.restore()}if(V.tooltip&&this.mouseX>=0){X.lineWidth=V.tooltipLine.lineWidth;X.strokeStyle=V.tooltipLine.strokeStyle;X.beginPath();X.moveTo(this.mouseX,0);X.lineTo(this.mouseX,J.height);X.closePath();X.stroke();this.updateTooltip()}if(!V.labels.disabled&&!isNaN(this.valueRange.min)&&!isNaN(this.valueRange.max)){var e=V.yMaxFormatter(this.valueRange.max,V.labels.precision),q=V.yMinFormatter(this.valueRange.min,V.labels.precision),G=V.scrollBackwards?0:J.width-X.measureText(e).width-2,f=V.scrollBackwards?0:J.width-X.measureText(q).width-2;X.fillStyle=V.labels.fillStyle;X.fillText(e,G,V.labels.fontSize);X.fillText(q,f,J.height-2)}if(V.labels.showIntermediateLabels&&!isNaN(this.valueRange.min)&&!isNaN(this.valueRange.max)&&V.grid.verticalSections>0){var F=(this.valueRange.max-this.valueRange.min)/V.grid.verticalSections;var l=J.height/V.grid.verticalSections;for(var K=1;K<V.grid.verticalSections;K++){var h=J.height-Math.round(K*l);if(V.grid.sharpLines){h-=0.5}var W=V.yIntermediateFormatter(this.valueRange.min+(K*F),V.labels.precision);intermediateLabelPos=V.labels.intermediateLabelSameAxis?(V.scrollBackwards?0:J.width-X.measureText(W).width-2):(V.scrollBackwards?J.width-X.measureText(W).width-2:0);X.fillText(W,intermediateLabelPos,h-V.grid.lineWidth)}}if(V.timestampFormatter&&V.grid.millisPerLine>0){var N=V.scrollBackwards?X.measureText(q).width:J.width-X.measureText(q).width+4;for(var L=M-(M%V.grid.millisPerLine);L>=A;L-=V.grid.millisPerLine){var j=B(L);if((!V.scrollBackwards&&j<N)||(V.scrollBackwards&&j>N)){var P=new Date(L),T=V.timestampFormatter(P),s=X.measureText(T).width;N=V.scrollBackwards?j+s+2:j-s-2;X.fillStyle=V.labels.fillStyle;if(V.scrollBackwards){X.fillText(T,j,J.height-2)}else{X.fillText(T,j-s,J.height-2)}}}}if(V.title.text!==""){X.font=V.title.fontSize+"px "+V.title.fontFamily;var z=V.scrollBackwards?J.width-X.measureText(V.title.text).width-2:2;if(V.title.verticalAlign=="bottom"){X.textBaseline="bottom";var O=J.height}else{if(V.title.verticalAlign=="middle"){X.textBaseline="middle";var O=J.height/2}else{X.textBaseline="top";var O=0}}X.fillStyle=V.title.fillStyle;X.fillText(V.title.text,z,O)}X.restore()};c.timeFormatter=function(e){function f(g){return(g<10?"0":"")+g}return f(e.getHours())+":"+f(e.getMinutes())+":"+f(e.getSeconds())};b.TimeSeries=a;b.SmoothieChart=c})(typeof exports==="undefined"?this:exports);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Randomly add a data point every 500ms
+var adc32 = new TimeSeries();
+var adc33 = new TimeSeries();
+var adc34 = new TimeSeries();
+var adc35 = new TimeSeries();
+var adc36 = new TimeSeries();
+var adc39 = new TimeSeries();
+var adcchart;
+var ADCin;  
+var running = true;
+
+var chartconfig={
+    responsive: true,
+    millisPerPixel:70,
+    tooltip:true,
+    timestampFormatter:SmoothieChart.timeFormatter,
+    horizontalLines:[{color:'#ffffff',lineWidth:1,value:0},{color:'#880000',lineWidth:2,value:3333},{color:'#880000',lineWidth:2,value:-3333}]
+    }
+
+function createTimeline1() {
+      adcchart = new SmoothieChart(chartconfig);        
+      adcchart.addTimeSeries(adc32, {lineWidth:2,strokeStyle:'#ff0000'});
+      adcchart.addTimeSeries(adc33, {lineWidth:2,strokeStyle:'#ffff00'});
+      adcchart.addTimeSeries(adc34, {lineWidth:2,strokeStyle:'#66ff33'});
+      adcchart.addTimeSeries(adc35, {lineWidth:2,strokeStyle:'#00ffff'});
+      adcchart.addTimeSeries(adc36, {lineWidth:2,strokeStyle:'#cc66ff'});
+      adcchart.addTimeSeries(adc39, {lineWidth:2,strokeStyle:'#ffffff'});
+      adcchart.streamTo(document.getElementById("ADCchart"), 500);
+      }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var hii;
+var XX="ws://";
+XX+=location.hostname;
+XX+=":81/";
+var SocketConnection = new WebSocket(XX, ['arduino']);
+var connctionStaet=0;
+
+SocketConnection.onopen = function () {
+  SocketConnection.send('config');
+  connctionStaet=1;                                    
+	};
+
+SocketConnection.onerror = function (error) {console.log('WebSocket Error ', error);};
+
+SocketConnection.onmessage = function (event) {
+	//console.log('Server: ', event.data);
+  var X= event.data;
+  if(X.startsWith("adc")){
+    X=X.replace("adc", "");
+    console.log('Server: ', X);
+    jsons = JSON.parse(X);
+    GetSocketMsg();
+  }
+  if(X.startsWith("config")){
+    X=X.replace("config", "");
+    console.log('Server: ', X);
+    config = JSON.parse(X);
+    pageconfig();
+    
+  }
+  
+};
+
+function GetSocketMsg(){
+  document.getElementById("RSSI").innerHTML=jsons.RSSI;
+  if(config.io32.type==6){
+    adc32.append(new Date().getTime(), jsons.io32.AdcVal);
+    document.getElementById("ADC32t").innerHTML=jsons.io32.AdcVal;
+  }
+  if(config.io33.type==6){
+    adc33.append(new Date().getTime(), jsons.io33.AdcVal);
+    document.getElementById("ADC33t").innerHTML=jsons.io33.AdcVal;
+  }
+  if(config.io34.type==6){
+    adc34.append(new Date().getTime(), jsons.io34.AdcVal);
+    document.getElementById("ADC34t").innerHTML=jsons.io34.AdcVal;
+  }
+  if(config.io35.type==6){
+    adc35.append(new Date().getTime(), jsons.io35.AdcVal);
+    document.getElementById("ADC35t").innerHTML=jsons.io35.AdcVal;
+  }
+  if(config.io36.type==6){
+    adc36.append(new Date().getTime(), jsons.io36.AdcVal);
+    document.getElementById("ADC36t").innerHTML=jsons.io36.AdcVal;
+  }
+  if(config.io39.type==6){
+    adc39.append(new Date().getTime(), jsons.io39.AdcVal);
+    document.getElementById("ADC39t").innerHTML=jsons.io39.AdcVal;
+  }
+       // adc33.append(new Date().getTime(), jsons.ADC33);
+       // adc34.append(new Date().getTime(), jsons.ADC34);
+       // adc35.append(new Date().getTime(), jsons.ADC35);
+       // adc36.append(new Date().getTime(), jsons.ADC36);
+       // adc39.append(new Date().getTime(), jsons.ADC39); 
+        
+       // document.getElementById("ADC33t").innerHTML=jsons.ADC33;
+       // document.getElementById("ADC34t").innerHTML=jsons.ADC34;
+        //document.getElementById("ADC35t").innerHTML=jsons.ADC35;
+       // document.getElementById("ADC36t").innerHTML=jsons.ADC36;
+       // document.getElementById("ADC39t").innerHTML=jsons.ADC39;
+       // document.getElementById("RSSI").innerHTML=jsons.RSSI;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var reloadPeriod = 1000;
+var mytimer;
+
+function Sstart(){
+   mytimer = setInterval(myTimer, reloadPeriod);
+   document.getElementById("Sstop").disabled=false;
+   document.getElementById("Sstart").disabled=true;
+   }
+
+function myTimer() {RunDoc();}
+
+function Sstop(){
+  clearInterval(mytimer);
+  document.getElementById("Sstop").disabled=true;
+  document.getElementById("Sstart").disabled=false;
+  }
+
+function timerset(){
+  var XX=document.getElementById("timerSet");
+  if(XX.value<200){XX.value=200;}
+  reloadPeriod=XX.value;
+  Sstop();
+  Sstart();
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function movepage(page){
+  Sstop();
+  if(page==1){setTimeout( location.replace("index.html"), 800);}
+  if(page==2){setTimeout( location.replace("wifi.html"), 800);}
+  if(page==3){setTimeout( location.replace("mqtt.html"), 800);}
+  if(page==4){setTimeout( location.replace("GPIO.html"), 800);}
+  //if(page==5){setTimeout( location.replace("ADC.html"), 800);}
+  if(page==6){setTimeout( location.replace("serial.html"), 800);}
+  if(page==7){setTimeout( location.replace("sleepmode.html"), 800);}
+  if(page==8){setTimeout( location.replace("info.html"), 800);}
+  if(page==9){setTimeout( location.replace("files.html"), 800);}
+  
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var res,myJSON,config;
+
+function RunDoc() {
+  if(connctionStaet==1){SocketConnection.send('adc');} 
+  };
+
+function pageconfig(){
+          document.getElementById("IP").innerHTML = "<b>IP: </b>"+ config.IP;
+          document.getElementById("MDNS").innerHTML = "<b>MDNS: </b>http://"+config.MDNS+".local";  
+          document.getElementById("mqttcon").innerHTML ="<b>MQTT: </b>"+ config.MQTTstate;
+          document.getElementById("SSID").innerHTML ="<b>SSID: </b>"+ config.SSID; 
+          document.getElementById("NatLocal").innerHTML = "<b>"+config.NAT+"</b>";  
+          
+          var XX=document.getElementById("tabel_adc").innerHTML;
+          var XI=document.getElementById("ADC_Chart").innerHTML;
+          if(config.io32.type==6){
+            XX+="<tr style=\"background-color:#ff0000\"> <td >32</td><td id=\"ADC32t\">0</td></tr>";
+            XI+="<div class=\"w3-bar-item w3-center\" style=\"background-color:#ff0000; width: 16%; margin-right: 0.8%; color: #444;\">32</div>";
+          }
+          if(config.io33.type==6){
+            XX+="<tr style=\"background-color:#ffff00\"><td>33</td><td id=\"ADC33t\">0</td></tr>";
+            XI+="<div class=\"w3-bar-item w3-center\" style=\"background-color:#ffff00; width: 16%; margin-right: 0.8%; color: #444;\">33</div>";
+          }
+          if(config.io34.type==6){
+            XX+="<tr style=\"background-color:#66ff33\"><td>34</td><td id=\"ADC34t\">14</td></tr>";
+            XI+="<div class=\"w3-bar-item w3-center\" style=\"background-color:#66ff33; width: 16%; margin-right: 0.8%; color: #444;\">34</div>";
+          }
+          if(config.io35.type==6){
+            XX+="<tr style=\"background-color:#00ffff\"><td>35</td><td id=\"ADC35t\">394</td></tr>";
+            XI+="<div class=\"w3-bar-item w3-center\" style=\"background-color:#00ffff; width: 16%; margin-right: 0.8%; color: #444;\">35</div>";
+          }
+          if(config.io36.type==6){
+            XX+="<tr style=\"background-color:#cc66ff\"><td>36</td><td id=\"ADC36t\">100</td></tr>";
+            XI+=" <div class=\"w3-bar-item w3-center\" style=\"background-color:#cc66ff; width: 16%; margin-right: 0.8%; color: #444;\">36</div>";
+          }
+          if(config.io39.type==6){
+            XX+="<tr style=\"background-color:#ffffff\"><td>39</td><td id=\"ADC39t\">825</td></tr>";
+            XI+="<div class=\"w3-bar-item w3-center\" style=\"background-color:#ffffff; width: 16%; color: #444;\">39</div>";
+          }
+          document.getElementById("tabel_adc").innerHTML=XX;
+          document.getElementById("ADC_Chart").innerHTML=XI;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+div.smoothie-chart-tooltip {
+  background: #444;
+  padding: 1em;
+  margin-top: 20px;
+  font-family: consolas;
+  color: white;
+  font-size: 10px;
+  pointer-events: none;
+}
+</style>
+<body onload="onstart()" class="w3-light-grey">
+
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-bar-item w3-right">Logo</span>
+</div>
+
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col s4">
+      <img src="#" class="w3-circle w3-margin-right" style="width:46px">
+    </div>
+    <div class="w3-col s8 w3-bar">
+      <span><strong>ESP32</strong></span><br>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <h5>Dashboard</h5>
+  </div>
+  <div class="w3-bar-block">
+    <button onclick="movepage(1);" class="w3-bar-item w3-button w3-padding">&ensp; Overview</button>
+    <button onclick="movepage(2);" class="w3-bar-item w3-button w3-padding">&ensp; WiFi</button>
+    <button onclick="movepage(3);" class="w3-bar-item w3-button w3-padding">&ensp; MQTT</button>
+    <button onclick="movepage(4);" class="w3-bar-item w3-button w3-padding">&ensp; GPIO</button>
+    <button  class="w3-bar-item w3-button w3-padding w3-blue">&ensp; ADC</button>
+    <button onclick="movepage(6);" class="w3-bar-item w3-button w3-padding">&ensp; I2C - SPI - URTA</button>
+    <button onclick="movepage(7);" class="w3-bar-item w3-button w3-padding">&ensp; SLEEP MODE</button>
+    <button onclick="movepage(9);" class="w3-bar-item w3-button w3-padding">&ensp; Files</button>
+    <button onclick="movepage(8);" class="w3-bar-item w3-button w3-padding">&ensp; INFO</button>
+    <br><br>
+  </div>
+</nav>
+
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> ADC </b></h5>
+  </header>
+ <!-- Header -->
+
+
+  <div class="w3-bar w3-black">
+
+      <div id="SSID" class="w3-bar-item"></div>
+    <div  class="w3-bar-item"><b>RSSI: </b><span id="RSSI" >65</span><b>dBm</b></div>
+    <div id="NatLocal"class="w3-bar-item"></div>
+    <div id="IP" class="w3-bar-item"></div>
+    <div id="MDNS" class="w3-bar-item"></div>
+    <div id="mqttcon" class="w3-bar-item"></div>
+
+    <div class="w3-bar-item w3-right">
+      <button id="Sstop" class="w3-button w3-tiny w3-white w3-round-xlarge" onclick="Sstop();">&#9724;</button>
+      <button id="Sstart" class="w3-button w3-tiny w3-white w3-round-xlarge" onclick="Sstart();">&#9654;</button>
+      <input id="timerSet"  type="number" style="width: 70px; text-align: center;" min="200" onchange="timerset();" value="1000"> mS
+    </div>
+  </div>
+
+
+  <div class="w3-panel">
+    <div class="w3-row-padding" style="margin:0 -16px">
+      <div >
+        <h5><b>ADC</b></h5>
+        <table id="tabel_adc" class="w3-table w3-striped w3-white">
+          <tr><td ><b>ADC PIN</b></td><td><b>Value</b></td></tr> 
+                 
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="w3-panel">
+    <div >
+      <h5><b>ADC Chart</b></h5>
+      <div id="ADC_Chart" class="w3-bar w3-black" style="color: #444">
+        
+      </div>
+      <canvas id="ADCchart" style="height: 70%; width: 100%;"></canvas>
+    </div>
+  </div>
+  
+  <hr>
+  <hr>
+
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+    <h4>FOOTER</h4>
+    <p>Powered by Gai Lazar</p>
+  </footer>
+
+  <!-- End page content -->
+</div>
+
+<script type="text/javascript" >
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+
+function onstart(){
+    //createTimeline();
+    createTimeline1();
+    //setTimeout(loadDoc, 1000);
+    setTimeout(Sstart, 1000);
+  }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+function move() {
+  document.getElementById('id01').style.display='block';
+  var elem = document.getElementById("myBar"); 
+  var width = 1;
+  var id = setInterval(frame, 200);
+  
+  function frame() {
+      var XX=document.getElementById("Waht");
+    if (width >= 100) {
+      clearInterval(id);
+       document.getElementById('id01').style.display='none';
+      // location.replace("ADC.html");
+      window.history.back();
+    } else {
+      width++; 
+      elem.style.width = width + '%'; 
+      elem.innerHTML= width + '%';
+      XX.innerHTML=XX.innerHTML+".";
+      if(width>=0 && width<=5){XX.innerHTML="get data";}
+      if(width>=15 && width<=20){XX.innerHTML="preper data for saveing";}
+      if(width>=30 && width<=35){XX.innerHTML="save";}
+      if(width>=45 && width<=50){XX.innerHTML="reset";}
+      if(width>=55 && width<=65){XX.innerHTML="restor configrtion";}
+      if(width>=75 && width<=80){XX.innerHTML="connect to wifi";}
+      if(width>=80 && width<=85){XX.innerHTML="load proogram";}
+      if(width>=91 && width<=95){XX.innerHTML="gooing back to proogram";}
+    }
+  }
+}
+
+</script>
+<style>
+    html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+<body style="text-align: center; background-color: #f1f1f1;" onload="move();">
+    <h1 style="background-color:black; color:white; padding: 8px;"><b>Multi Mini Maker</b></h1>
+    <br>
+  <div id="id01" style="background-color: gainsboro; width: auto;max-width: 600px; margin: auto;border-radius: 20px;" >
+   <br>
+       <div style="background-color: black;color: gainsboro;padding-top: 10px;padding-bottom: 10px;"><h2><b>Setting In Progress</b></h2></div>
+        <p id="Waht">Some text..</p>
+        <div style="background-color: grey;margin-left: 20px;margin-right: 20px;border-radius: 10px;">
+        <div id="myBar" style="height:24px;width:1%; background-color: green;border-radius: 10px;"></div>
+    </div>
+    <br>
+        <div style="background-color: black;color: gainsboro;padding-top: 5px;padding-bottom: 5px"><p><b>Will Automatle Go Back</b></p></div>
+      <br>
+  </div>    
+</body>
+</html>

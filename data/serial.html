@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="w3.css">
+<script type="text/javascript" >
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var res,myJSON,config,jsons,i2cres;
+
+function loadDoc() {
+  var xh = new XMLHttpRequest();
+    xh.onreadystatechange = function(){
+      if (xh.readyState == 4){
+        if(xh.status == 200) {
+          config=JSON.parse(xh.responseText);
+          pageconfig();
+          baudselcted();          
+        }
+      }
+    };
+    xh.open("GET", "/config", true);
+    xh.send(null);
+}
+
+function baudselcted(){
+  var X;
+  if(config.Serial==0){X+="<option value=\"0\" selected>NONE</option>";}else{X+="<option value=\"0\">NONE</option>";}
+  if(config.Serial==1){X+="<option value=\"1\" selected>300</option>";}else{X+="<option value=\"1\">300</option>";}
+  if(config.Serial==2){X+="<option value=\"2\" selected>1200</option>";}else{X+="<option value=\"2\">1200</option>";}
+  if(config.Serial==3){X+="<option value=\"3\" selected>2400</option>";}else{X+="<option value=\"3\">2400</option>";}
+  if(config.Serial==4){X+="<option value=\"4\" selected>4800</option>";}else{X+="<option value=\"4\">4800</option>";}
+  if(config.Serial==5){X+="<option value=\"5\" selected>9600</option>";}else{X+="<option value=\"5\">9600</option>";}
+  if(config.Serial==6){X+="<option value=\"6\" selected>19200</option>";}else{X+="<option value=\"6\">19200</option>";}
+  if(config.Serial==7){X+="<option value=\"7\" selected>38400</option>";}else{X+="<option value=\"7\">38400</option>";}
+  if(config.Serial==8){X+="<option value=\"8\" selected>57600</option>";}else{X+="<option value=\"8\">57600</option>";}
+  if(config.Serial==9){X+="<option value=\"9\" selected>74880</option>";}else{X+="<option value=\"9\">74880</option>";}
+  if(config.Serial==10){X+=" <option value=\"10\" selected>115200</option>";}else{X+="<option value=\"10\">115200</option>";}
+  if(config.Serial==11){X+="<option value=\"11\" selected>230400</option>";}else{X+="<option value=\"11\">230400</option>";}
+  if(config.Serial==12){X+="<option value=\"12\" selected>250000</option>";}else{X+="<option value=\"12\">250000</option>";}
+      document.getElementById("buad").innerHTML=X;
+
+}
+
+function pageconfig(){
+          document.getElementById("IP").innerHTML = "<b>IP: </b>"+ config.IP;
+          document.getElementById("MDNS").innerHTML = "<b>MDNS: </b>http://"+config.MDNS+".local";  
+          document.getElementById("mqttcon").innerHTML ="<b>MQTT: </b>"+ config.MQTTstate;
+          document.getElementById("SSID").innerHTML ="<b>SSID: </b>"+ config.SSID; 
+          document.getElementById("NatLocal").innerHTML = "<b>"+config.NAT+"</b>"; 
+          document.getElementById("RSSI").innerHTML = config.RSSI;  
+          baudselcted();
+}
+
+function SendMsg() {
+  var topic,massege,htp;
+  massege=document.getElementById("msgsend").value;
+  massege="--*serial*-- "+massege;
+  SocketConnection.send(massege);
+  document.getElementById("msgsend").value="";
+}
+
+function setBAUD(){
+  var buad=document.getElementById("buad").value;
+  var htp="/serialmsseg?baud="+buad;
+  var xh = new XMLHttpRequest();
+    xh.onreadystatechange = function(){
+      if (xh.readyState == 4){if(xh.status == 200) {
+       var jsons = JSON.parse(xh.responseText);
+           msgget(jsons.SerialMsg);
+        } 
+      }
+    };
+    xh.open("GET", htp, true);
+    xh.send(null);
+}
+
+function claerinput(){document.getElementById("msgdiv").innerHTML="";}
+
+function geti2c(){SocketConnection.send('i2c');}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var hii;
+var XX="ws://";
+XX+=location.hostname;
+XX+=":81/";
+var SocketConnection = new WebSocket(XX, ['arduino']);
+var connctionStaet=0;
+
+SocketConnection.onopen = function () {
+  SocketConnection.send('config');
+  setTimeout(SocketConnection.send('serial'), 500);
+  connctionStaet=1;                                      
+	};
+
+SocketConnection.onerror = function (error) {console.log('WebSocket Error ', error);};
+
+SocketConnection.onmessage = function (event) {
+	//console.log('Server: ', event.data);
+var X= event.data;
+
+if(X.startsWith("i2c")){
+    X=X.replace("i2c", "");
+    console.log('Server: ', X);
+    i2cres = JSON.parse(X);            
+    var msg;
+    msg=i2cres.i2cscanResolt +" Devices<br>"; 
+    for(i in i2cres.i2cScan){
+    if(i2cres.i2cScan[i] != undefined){msg+=i2cres.i2cScan[i]+"<br>";}
+    }
+    document.getElementById("i2cmsg").innerHTML=msg;
+  }
+if(X.startsWith("--*serial*--")){
+    X=X.replace("--*serial*--", "");
+    var Y2=document.getElementById("msgdiv").innerHTML;
+    Y2+=X+"<br>";
+    document.getElementById("msgdiv").innerHTML=Y2;
+  }
+if(X.startsWith("config")){
+    X=X.replace("config", "");
+    console.log('Server: ', X);
+    config = JSON.parse(X);
+    pageconfig();
+  }
+ 
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////start timer
+var mytimer;
+var reloadPeriod = 1000;
+
+function Sstart(){
+   mytimer = setInterval(myTimer, reloadPeriod);
+   document.getElementById("Sstop").disabled=false;
+   document.getElementById("Sstart").disabled=true;
+   }
+
+function myTimer() {RunDoc();}
+
+function Sstop(){
+  clearInterval(mytimer);
+  document.getElementById("Sstop").disabled=true;
+  document.getElementById("Sstart").disabled=false;
+  }
+
+function timerset(){
+var XX=document.getElementById("timerSet");
+if(XX.value<1000){XX.value=1000;}
+reloadPeriod=XX.value;
+Sstop();
+Sstart();
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function movepage(page){
+ // Sstop();
+  if(page==1){setTimeout( location.replace("index.html"), 800);}
+  if(page==2){setTimeout( location.replace("wifi.html"), 800);}
+  if(page==3){setTimeout( location.replace("mqtt.html"), 800);}
+  if(page==4){setTimeout( location.replace("GPIO.html"), 800);}
+  if(page==5){setTimeout( location.replace("ADC.html"), 800);}
+  //if(page==6){setTimeout( location.replace("serial.html"), 800);}
+  if(page==7){setTimeout( location.replace("sleepmode.html"), 800);}
+  if(page==8){setTimeout( location.replace("info.html"), 800);}
+  if(page==9){setTimeout( location.replace("files.html"), 800);}
+  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+
+<body onload="onstart()" class="w3-light-grey">
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-bar-item w3-right">Logo</span>
+</div>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col s4">
+      <img src="#" class="w3-circle w3-margin-right" style="width:46px">
+    </div>
+    <div class="w3-col s8 w3-bar">
+      <span><strong>ESP32</strong></span><br>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <h5>Dashboard</h5>
+  </div>
+  <div class="w3-bar-block">
+    <button onclick="movepage(1);" class="w3-bar-item w3-button w3-padding ">&ensp; Overview</button>
+    <button onclick="movepage(2);" class="w3-bar-item w3-button w3-padding">&ensp; WiFi</button>
+    <button onclick="movepage(3);" class="w3-bar-item w3-button w3-padding">&ensp; MQTT</button>
+    <button onclick="movepage(4);" class="w3-bar-item w3-button w3-padding">&ensp; GPIO</button>
+    <button onclick="movepage(5);" class="w3-bar-item w3-button w3-padding ">&ensp; ADC</button>
+    <button class="w3-bar-item w3-button w3-padding w3-blue">&ensp; I2C - SPI - URTA</button>
+    <button onclick="movepage(7);" class="w3-bar-item w3-button w3-padding">&ensp; SLEEP MODE</button>
+    <button onclick="movepage(9);" class="w3-bar-item w3-button w3-padding">&ensp; Files</button>
+    <button onclick="movepage(8);" class="w3-bar-item w3-button w3-padding">&ensp; INFO</button>
+  <br><br>  
+  </div>
+</nav>
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> I2C - SPI - URTA</b></h5>
+  </header>
+ <!-- Header -->
+
+ <div class="w3-bar w3-black">
+    
+  <div id="SSID" class="w3-bar-item"></div>
+  <div  class="w3-bar-item"><b>RSSI: </b><span id="RSSI" >65</span><b>dBm</b></div>
+  <div id="NatLocal"class="w3-bar-item"></div>
+  <div id="IP" class="w3-bar-item"></div>
+  <div id="MDNS" class="w3-bar-item"></div>
+  <div id="mqttcon" class="w3-bar-item"></div>
+
+</div>
+
+  <div class="w3-row-padding w3-margin-bottom">
+    <p>info info info info</p>
+    <p>Please enter your password by selecting the SSID.</p>
+  </div>
+
+  <hr>
+
+  <div class="w3-panel">
+    <div class="w3-row-padding w3-margin-bottom">
+
+    <div class="w3-twothird w3-padding-16 " style="text-align: center">
+      <div class="w3-container w3-gray w3-padding-16 w3-border w3-round-xlarge">
+          <div class="w3-round-xlarge" style="background-color: black" ><h4 class="w3-text-white"><b>Serial</b></h4></div>
+        <br>
+        <input id="msgsend" type="text" name="msgS" max="100" style="width:100%; margin: auto;">
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+        <button class="w3-button w3-small w3-black w3-round-xlarge" onclick=" SendMsg()"><b>SEND</b></button>
+        </div>
+        <div id="msgdiv" style=" height: 300px; overflow: auto; background-color: white; margin: auto; text-align: left;">          
+        </div><br>
+        <button class="w3-left w3-button w3-tiny w3-black w3-round-xlarge" onclick=" claerinput()">Claer Output</button>
+        <div class="w3-right">
+            <form class="w3-container" method="GET" action="serialmsseg" >
+                <label class="w3-text-brown">BAUD : </label>
+                <select id="buad" name="baud"></select>
+                <input class=" w3-button w3-tiny w3-black w3-round-xlarge" type="submit" value="SET">
+            </form>
+         </div>
+         <br><br>
+       </div>
+    </div>
+
+
+  
+    <div class="w3-third w3-padding-16 " style="text-align: center">
+      <div class="w3-container w3-gray w3-padding-16 w3-border w3-round-xlarge">
+          <div class="w3-round-xlarge" style="background-color: black" ><h4 class="w3-text-white"><b>I2C</b></h4></div><br>
+            <div style="margin-bottom: 10px;">
+            <button class="w3-button w3-small w3-black w3-round-xlarge" onclick="geti2c()" ><b>SCAN</b></button>
+            </div>
+          <div id="i2cmsg" style=" height: 300px; overflow: auto; background-color: white; margin: auto; text-align: left;"></div>
+      <br><br>
+    </div>
+      <br><br>
+    </div>
+      
+  </div>
+</div>
+
+
+  </div>
+  
+  <hr>
+
+  
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+    <h4>FOOTER</h4>
+    <p>Powered by Gai Lazar</p>
+  </footer>
+  <!-- End page content -->
+</div>
+
+<script type="text/javascript" >
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+
+function onstart(){
+  //setTimeout(loadDoc, 1000);
+  //setTimeout(Sstart, 1500);
+  }
+</script>
+
+</body>
+</html>

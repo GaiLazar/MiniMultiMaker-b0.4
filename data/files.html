@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="w3.css">
+<script type="text/javascript" >
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var res,myJSON,gfile,config;
+
+
+
+function pageconfig() {
+    document.getElementById("IP").innerHTML = "<b>IP: </b>"+ config.IP;
+    document.getElementById("MDNS").innerHTML = "<b>MDNS: </b>http://"+config.MDNS+".local";  
+    document.getElementById("mqttcon").innerHTML ="<b>MQTT: </b>"+ config.MQTTstate;
+    document.getElementById("SSID").innerHTML ="<b>SSID: </b>"+ config.SSID; 
+    document.getElementById("NatLocal").innerHTML = "<b>"+config.NAT+"</b>"; 
+    //document.getElementById("mdns").value=config.MDNS;
+    //document.getElementById("apssid").value=config.apSSID;
+    //document.getElementById("offsetclk").value=config.offsetclk;
+    //document.getElementById("ntpclk").value=config.ntpclk;
+    //document.getElementById("RSSI").innerHTML=config.RSSI;
+};
+
+//function htphtp(){
+//  document.getElementById("htp").innerHTML=document.getElementById("mdns").value;
+//};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var hii;
+var XX="ws://";
+XX+=location.hostname;
+//XX+="192.168.31.197"
+XX+=":81/";
+var SocketConnection = new WebSocket(XX, ['arduino']);
+var connctionStaet=0;
+
+
+SocketConnection.onopen = function () {
+  SocketConnection.send('config');
+  setTimeout(SocketConnection.send('--filelist--'), 500); 
+  
+  connctionStaet=1;                                     
+};
+
+
+SocketConnection.onerror = function (error) {console.log('WebSocket Error ', error);};
+
+SocketConnection.onmessage = function (event) {
+	//console.log('Server: ', event.data);
+  var X= event.data;
+  
+  if(X.startsWith("config")){
+    X=X.replace("config", "");
+    console.log('Server: ', X);
+    config = JSON.parse(X);
+    pageconfig();  
+    X="";
+  }
+  ///////////////////////////////////////list of filse
+  if(X.startsWith("--filelist--")){
+    X=X.replace("--filelist--", "");
+    const mfilelist = JSON.parse(X);
+    console.log('filelist: ', X);
+    let textff = "";
+    for (const x in mfilelist.filelist) {
+    //textff += "<b onclick=\"SocketConnection.send('fsread:"+ mfilelist.filelist[x].name + "');\">"+mfilelist.filelist[x].name + "</b> size: " + mfilelist.filelist[x].size + "<br>";
+    textff+="<a href=\"#\" onclick=\"getfile('"+ mfilelist.filelist[x].name + "');\">"+mfilelist.filelist[x].name + "</a> size: " + mfilelist.filelist[x].size + "<br>";
+     }
+    document.getElementById("flist").innerHTML=textff;
+    X="";
+  }
+
+  ////////////////////////////////////////read filse
+  if(X.startsWith("--**Sfile:")){
+    X=X.replace("--**Sfile:", "");
+    gfile+=X;
+    console.log('sfile: ', X);
+    X="";
+  }
+
+  if(X.startsWith("--**Sfile**--")){
+    let txta, txtb ,txtc;
+   // txta=gfile.replace(/</g, " &lt; ");
+    //txtb=txta.replace(/>/g, " &gt; "); 
+    txtc=gfile.replace("undefined", ""); 
+    console.log('astext: ', txtc);
+    document.getElementById("filetext").value=txtc;
+    gfile="";
+  } 
+ 
+};
+
+
+///////////////////////////////////////////////////////////////uplode file
+var textpointer=0;
+
+function uplodefile(){
+  var name = document.getElementById("filename").value;
+  var text =document.getElementById("filetext").value  ;
+  var texttosend;
+  var numofbyt=text.length;
+  var finse=0;
+      textpointer=0;
+      console.log('upfile: ', text);
+      console.log('upfile: ', numofbyt);
+      var x =  0;
+      var ttime=0;
+
+  while(textpointer != numofbyt){
+    ttime++;
+    texttosend = "--**upfile**--:--"+ name +"--";
+    x = textpointer+200;
+    if(x > numofbyt){
+      x= numofbyt;
+      texttosend += text.substring(textpointer,numofbyt)
+      setInterval(SocketConnection.send(texttosend), 100);
+      if(x == numofbyt){textpointer=numofbyt;}
+    }
+    else {
+      texttosend += text.substring(textpointer,x)
+      textpointer=x;
+      setInterval(SocketConnection.send(texttosend), 500*ttime);
+    }
+    
+    if(textpointer == numofbyt ){SocketConnection.send("--**upfilend**--");} 
+
+    console.log('X: ', x);
+    console.log('textpointer: ', textpointer);
+    console.log('upfile:send ', texttosend);
+    
+  }
+  setInterval(SocketConnection.send('--filelist--'), 500);
+}
+///////////////////////////////////////////////////////////read file
+
+function getfile(fname){
+  var nneme="fsread:"+fname;
+  SocketConnection.send(nneme);
+  document.getElementById("filename").value=nneme.replace("fsread:", "");
+}
+
+//////////////////////////////////////////////////////////////////////delete file
+function deletefile(){
+  var name = document.getElementById("filename").value;
+  name = "--**deletefile**--:--"+ name +"--";
+  SocketConnection.send(name);
+  name="";
+  SocketConnection.send('--filelist--');
+  document.getElementById("filename").value="";
+  document.getElementById("filetext").value ="" ;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function movepage(page){
+ // Sstop();
+  if(page==1){setTimeout( location.replace("index.html"), 800);}
+  if(page==2){setTimeout( location.replace("wifi.html"), 800);}
+  if(page==3){setTimeout( location.replace("mqtt.html"), 800);}
+  if(page==4){setTimeout( location.replace("GPIO.html"), 800);}
+  if(page==5){setTimeout( location.replace("ADC.html"), 800);}
+  if(page==6){setTimeout( location.replace("serial.html"), 800);}
+  if(page==7){setTimeout( location.replace("sleepmode.html"), 800);}
+  if(page==8){setTimeout( location.replace("info.html"), 800);}
+  //if(page==9){setTimeout( location.replace("files.html"), 800);}
+  
+};
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+
+<body onload="onstart()" class="w3-light-grey">
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-bar-item w3-right">Logo</span>
+</div>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col s4">
+      <img src="#" class="w3-circle w3-margin-right" style="width:46px">
+    </div>
+    
+    <div class="w3-col s8 w3-bar">
+      <span><strong>ESP32</strong></span><br>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <h5>Dashboard</h5>
+  </div>
+  <div class="w3-bar-block">
+    <button onclick="movepage(1);" class="w3-bar-item w3-button w3-padding ">&ensp; Overview</button>
+    <button onclick="movepage(2);"  class="w3-bar-item w3-button w3-padding ">&ensp; WiFi</button>
+    <button onclick="movepage(3);" class="w3-bar-item w3-button w3-padding">&ensp; MQTT</button>
+    <button onclick="movepage(4);" class="w3-bar-item w3-button w3-padding">&ensp; GPIO</button>
+    <button onclick="movepage(5);" class="w3-bar-item w3-button w3-padding ">&ensp; ADC</button>
+    <button onclick="movepage(6);" class="w3-bar-item w3-button w3-padding">&ensp; I2C - SPI - URTA</button>
+    <button onclick="movepage(7);" class="w3-bar-item w3-button w3-padding">&ensp; SLEEP MODE</button>
+    <button class="w3-bar-item w3-button w3-padding w3-blue">&ensp; Files</button>
+    <button onclick="movepage(8);" class="w3-bar-item w3-button w3-padding">&ensp; INFO</button>
+  <br><br>
+  </div>
+</nav>
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> Filesystem</b></h5>
+  </header>
+ <!-- Header -->
+
+ <div class="w3-bar w3-black">
+    
+    <div id="SSID" class="w3-bar-item"></div>
+    <div  class="w3-bar-item"><b>RSSI: </b><span id="RSSI" >65</span><b>dBm</b></div>
+    <div id="NatLocal"class="w3-bar-item"></div>
+    <div id="IP" class="w3-bar-item"></div>
+    <div id="MDNS" class="w3-bar-item"></div>
+    <div id="mqttcon" class="w3-bar-item"></div>
+
+  </div>
+
+ <div class="w3-panel">
+    <p>info info info info</p>
+    <p>Please enter your password by selecting the SSID.</p>
+  </div>
+  <hr>
+
+  <div class="w3-panel">
+      <div class="w3-row-padding w3-margin-bottom">
+  
+    <div class="w3-quarter">
+        <p style="text-align: center" ><b>file list</b></p>
+       <div id="flist"></div>
+       
+     </div>
+    
+     <div class="w3-threequarter">
+    <p style="text-align: left"><b>file name: </b> <input type="text" id="filename"></input>
+      <button onclick="uplodefile();" >uplode</button>
+      <button onclick="deletefile();" >delete</button>
+      
+
+    </p>
+    <pre><code><textarea style="overflow: scroll; width: 100%; " id="filetext" rows="20"></textarea></code> </pre>
+     <br>  
+</div>
+
+
+</div></div>
+  
+  <hr>
+  
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+    <h4>FOOTER</h4>
+    <p>Powered by Gai Lazar</p>
+  </footer>
+  <!-- End page content -->
+</div>
+
+<script type="text/javascript" >
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+
+function onstart(){
+  //setTimeout(loadDoc, 1000);
+  //setTimeout(loadconfig, 1500);  
+  }
+ 
+</script>
+
+</body>
+</html>

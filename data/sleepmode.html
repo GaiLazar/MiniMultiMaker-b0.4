@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="w3.css">
+<script type="text/javascript" >
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var res,myJSON,config;
+
+function pageconfig() {
+  SetGpioSleepStatus(config.io2.pin,config.io2.interup,config.io2.Touch);
+  SetGpioSleepStatus(config.io4.pin,config.io4.interup,config.io4.Touch);
+  SetGpioSleepStatus(config.io12.pin,config.io12.interup,config.io12.Touch);
+  SetGpioSleepStatus(config.io13.pin,config.io13.interup,config.io13.Touch);
+  SetGpioSleepStatus(config.io14.pin,config.io14.interup,config.io14.Touch);
+  SetGpioSleepStatus(config.io15.pin,config.io15.interup,config.io15.Touch);
+  SetGpioSleepStatus(config.io25.pin,config.io25.interup,config.io25.Touch);
+  SetGpioSleepStatus(config.io26.pin,config.io26.interup,config.io26.Touch);
+  SetGpioSleepStatus(config.io27.pin,config.io27.interup,config.io27.Touch);
+  setTimerAndtime();
+  document.getElementById("RSSI").innerHTML=config.RSSI;
+  document.getElementById("IP").innerHTML = "<b>IP: </b>"+ config.IP;
+  document.getElementById("MDNS").innerHTML = "<b>MDNS: </b>http://"+config.MDNS+".local";  
+  document.getElementById("mqttcon").innerHTML ="<b>MQTT: </b>"+ config.MQTTstate;
+  document.getElementById("SSID").innerHTML ="<b>SSID: </b>"+ config.SSID; 
+  document.getElementById("NatLocal").innerHTML = "<b>"+config.NAT+"</b>";  
+  document.getElementById("iores").innerHTML=config.WakeupIOres;
+  document.getElementById("touchres").innerHTML=config.WakeupTouchPad;
+}
+
+function setTimerAndtime(){
+  document.getElementById("timeM").value=config.TimeOfSleep;
+  if(config.ButtonInterup==0){document.getElementById("ioIntrup0").checked=true;}
+  if(config.ButtonInterup==1){document.getElementById("ioIntrup1").checked=true;}
+}
+function SetGpioSleepStatus(pin,interup,touch){
+       var XX="<tr>";
+          XX+="<th class=\"w3-text-brown\"><label class=\"w3-text-brown\">"+pin+"</label></th>";
+          
+          
+          XX+="<th class=\"w3-text-brown\"><input type=\"radio\" name=\"IO"+pin+"\"  value=\"1\" ";
+          if(interup==1){XX+="checked";}
+          XX+="><label class=\"w3-text-brown\"></label> </th>";
+          
+         // else{ XX+="<th class=\"w3-text-brown\"></th>"; }
+           
+          if(touch==1){
+          XX+="<th class=\"w3-text-brown\"><input type=\"radio\" name=\"IO"+pin+"\"  value=\"2\"";
+          if(interup==2){XX+="checked";}
+          XX+=" > <label class=\"w3-text-brown\"></label></th>";
+          }
+          else{ XX+="<th class=\"w3-text-brown\"></th>"; }
+
+          XX+="<th class=\"w3-text-brown\"><input type=\"radio\" name=\"IO"+pin+"\"  value=\"0\"";
+          if(interup==0){XX+="checked";}
+          XX+=" > <label class=\"w3-text-brown\"></label></th>";
+
+          XX+="</tr>";
+      var YY=document.getElementById("gpioTable").innerHTML;
+      YY+=XX;
+      document.getElementById("gpioTable").innerHTML=YY;
+}
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  var hii;
+var XX="ws://";
+XX+=location.hostname;
+XX+=":81/";
+var SocketConnection = new WebSocket(XX, ['arduino']);
+var connctionStaet=0;
+
+SocketConnection.onopen = function () {
+  SocketConnection.send('config');
+  connctionStaet=1;             
+                           
+};
+
+
+SocketConnection.onerror = function (error) {console.log('WebSocket Error ', error);};
+
+SocketConnection.onmessage = function (event) {
+	//console.log('Server: ', event.data);
+  var X= event.data;
+  
+  if(X.startsWith("button")){
+    X=X.replace("button", "");
+    console.log('Server: ', X);
+    jsons = JSON.parse(X);
+    document.getElementById("RSSI").innerHTML=jsons.RSSI;
+    GetSocketMsg();
+  }
+  if(X.startsWith("config")){
+    X=X.replace("config", "");
+    console.log('Server: ', X);
+    config = JSON.parse(X);
+           pageconfig();
+  }
+  
+};
+
+function GetSocketMsg(){
+  document.getElementById("RSSI").innerHTML=jsons.RSSI;
+  
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function movepage(page){
+ // Sstop();
+  if(page==1){setTimeout( location.replace("index.html"), 800);}
+  if(page==2){setTimeout( location.replace("wifi.html"), 800);}
+  if(page==3){setTimeout( location.replace("mqtt.html"), 800);}
+  if(page==4){setTimeout( location.replace("GPIO.html"), 800);}
+  if(page==5){setTimeout( location.replace("ADC.html"), 800);}
+  if(page==6){setTimeout( location.replace("serial.html"), 800);}
+  //if(page==7){setTimeout( location.replace("sleepmode.html"), 800);}
+  if(page==9){setTimeout( location.replace("files.html"), 800);}
+  if(page==8){setTimeout( location.replace("info.html"), 800);}
+  
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+
+<body onload="onstart()" class="w3-light-grey">
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-bar-item w3-right">Logo</span>
+</div>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col s4">
+      <img src="#" class="w3-circle w3-margin-right" style="width:46px">
+    </div>
+    <div class="w3-col s8 w3-bar">
+      <span><strong>ESP32</strong></span><br>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <h5>Dashboard</h5>
+  </div>
+  <div class="w3-bar-block">
+    <button onclick="movepage(1);" class="w3-bar-item w3-button w3-padding">&ensp; Overview</button>
+    <button onclick="movepage(2);" class="w3-bar-item w3-button w3-padding">&ensp; WiFi</button>
+    <button onclick="movepage(3);" class="w3-bar-item w3-button w3-padding">&ensp; MQTT</button>
+    <button onclick="movepage(4);" class="w3-bar-item w3-button w3-padding">&ensp; GPIO</button>
+    <button onclick="movepage(5);" class="w3-bar-item w3-button w3-padding">&ensp; ADC</button>
+    <button onclick="movepage(6);" class="w3-bar-item w3-button w3-padding">&ensp; I2C - SPI - URTA</button>
+    <button  class="w3-bar-item w3-button w3-padding w3-blue">&ensp; SLEEP MODE</button>
+    <button onclick="movepage(9);" class="w3-bar-item w3-button w3-padding">&ensp; Files</button>
+    <button onclick="movepage(8);" class="w3-bar-item w3-button w3-padding">&ensp; INFO</button>
+  <br><br>  
+  </div>
+</nav>
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> Sleep Mode</b></h5>
+  </header>
+ <!-- Header -->
+
+ <div class="w3-bar w3-black">
+    <div id="SSID" class="w3-bar-item"></div>
+    <div  class="w3-bar-item"><b>RSSI: </b><span id="RSSI" >65</span><b>dBm</b></div>
+    <div id="NatLocal"class="w3-bar-item"></div>
+    <div id="IP" class="w3-bar-item"></div>
+    <div id="MDNS" class="w3-bar-item"></div>
+    <div id="mqttcon" class="w3-bar-item"></div>
+  </div>
+
+  <div class="w3-panel">
+ <p><b>Wakeup Reason :</b></p>
+ <p id="iores"></p>
+ <p id="touchres"></p>
+  </div>
+
+  <div class="w3-panel">
+
+  <div class="w3-third">
+     
+    <form class="w3-container" method="GET" action="setinterup" >
+      
+       
+       <table class="w3-table">
+          <tr>
+              <th class="w3-text-brown"><label class="w3-text-brown">Sleep Mode : </label></th>
+              <th class="w3-text-brown">
+                <input type="radio" name="sleep"  value="1" ><label class="w3-text-brown">ON </label> 
+                <input type="radio" name="sleep"  value="0" checked> <label class="w3-text-brown">OFF </label>
+              </th>
+              
+            
+          </tr>
+          <tr>
+              <th class="w3-text-brown"><label class="w3-text-brown">I/O Waekup : </label></th>
+              <th class="w3-text-brown">
+              <input id="ioIntrup1" type="radio" name="iointerup"  value="1" ><label class="w3-text-brown">ON </label> 
+              <input id="ioIntrup0" type="radio" name="iointerup"  value="0" checked> <label class="w3-text-brown">OFF </label>
+            </th>
+              
+            
+          </tr>
+
+  
+          <tr>
+              <th class="w3-text-brown"><label class="w3-text-brown">Time Of Sleep In M </label></th>
+              <th class="w3-text-brown">
+                  <input id="timeM" style="width: 100px;" class="w3-input w3-border w3-sand" min="1" name="timer" type="number" value="5">
+              </th>
+          </tr>
+      </table>
+
+
+       <br>
+      
+       <label class="w3-text-brown">GPIO WAEKUP ON PULL UP </label><br>
+
+       <table id="gpioTable" class="w3-table w3-bordered" style="text-align: center;">
+          <tr>
+            <th class="w3-text-brown"><label class="w3-text-brown">I/O</label></th>
+            <th class="w3-text-brown"><label class="w3-text-brown">ON</label></th>
+            <th class="w3-text-brown"><label class="w3-text-brown">TOUCH</label></th>
+            <th class="w3-text-brown"><label class="w3-text-brown">OFF</label></th>
+          </tr>
+      </table>
+
+
+      <br> <br>
+       <input class="w3-button w3-black w3-round-xlarge" type="submit">
+    </form>
+  </div>
+
+  
+  </div>
+  
+  <hr>
+  
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+    <h4>FOOTER</h4>
+    <p>Powered by Gai Lazar</p>
+  </footer>
+  <!-- End page content -->
+</div>
+
+<script type="text/javascript" >
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+
+function onstart(){
+  //setTimeout(loadDoc, 500);
+  }
+</script>
+
+</body>
+</html>

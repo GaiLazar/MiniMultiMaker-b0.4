@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<title>Multi Mini Maker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="w3.css">
+<script type="text/javascript" >
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////GPIO
+var jsons,config;
+
+function GPIO(){
+  this.pin=0,
+  this.Touch=false,
+  this.spi=false,
+  this.ClockNum=0,
+  this.type=0,
+  this.IOset=0,
+  this.IOstaet=0,
+  this.PwM=0,
+  this.MaxDute=8191,
+  this.Hz=5000,
+  this.Bit=13,
+  this.TouchNum=0,
+  this.TouchVlue=0,
+  this.ADC=0,
+  this.AdcVal=0,
+  this.AdcMax=0,
+  this.AdcMin=0,
+this.SetALLconfig= function(XX){
+     this.pin=XX.pin;
+     this.spi=XX.spi;
+     this.type=XX.type;
+     this.IOset=XX.IOset;
+     this.Hz=XX.Hz;
+     this.Bit=XX.Bit;
+     this.MaxDute=XX.MaxDute;
+     this.Touch=XX.Touch;
+     this.IOstaet=XX.IOstaet;
+     this.PwM=XX.PwM;
+     this.RunInterup=XX.RunInterup;
+     this.Uname=XX.Uname;
+     this.TouchTHRESHOLD=XX.TouchTHRESHOLD;
+     this.ADC=XX.ADC;
+     this.AdcVal=XX.AdcVal;
+     this.AdcMax=XX.AdcMax;
+     this.AdcMin=XX.AdcMin;
+     },
+this.SetALL= function(XX){
+     this.PwM=XX.PwM;
+     this.TouchVlue=XX.TouchVlue;
+     this.IOstaet=XX.IOstaet;
+     },
+this.visal=function(){
+
+    if(this.type==0){
+      if(this.IOset==0){
+            var PP=document.getElementById("InputPanel");
+            var PH=document.getElementById("InputPanelH");
+            if(PP.style.display === "none"){PP.style.display = "block";PH.style.display = "block";};
+            var buttonMaker="<button id=\"butio"+this.pin+"\" style=\"margin: 10px;\" class=\"w3-btn w3-small w3-black w3-round-xlarge\" onclick=\"IO"+this.pin+".buttonOnOff();\"><b>IO"+this.pin+"</b>";
+          buttonMaker+="<span id=\"bdgbut"+this.pin+"\" class=\"w3-badge w3-margin-left w3-green\">";
+          buttonMaker+="ON</span></button>";
+          var X=PP.innerHTML;
+          X+=buttonMaker;
+          PP.innerHTML=X;
+           }    
+      if(this.IOset==1){
+            var PP=document.getElementById("ButtonPanel");
+            var PH=document.getElementById("ButtonPanelH");
+            if(PP.style.display === "none"){PP.style.display = "block";PH.style.display = "block";};
+            var buttonMaker="<button id=\"butio"+this.pin+"\" style=\"margin: 10px\" class=\"w3-btn w3-small w3-black w3-round-xlarge\" onclick=\"IO"+this.pin+".buttonOnOff();\"><b>IO"+this.pin+"</b>";
+          buttonMaker+="<span id=\"bdgbut"+this.pin+"\" class=\"w3-badge w3-margin-left w3-green\">";
+          buttonMaker+="ON</span></button>";
+          var X=PP.innerHTML;
+          X+=buttonMaker;
+          PP.innerHTML=X;
+           }    
+      if(this.IOset==2){
+            var PP=document.getElementById("InputPuPanel");
+            var PH=document.getElementById("InputPuPanelH");
+            if(PP.style.display === "none"){PP.style.display = "block";PH.style.display = "block";};
+            var buttonMaker="<button id=\"butio"+this.pin+"\" style=\"margin: 10px\" class=\"w3-btn w3-small w3-black w3-round-xlarge\" onclick=\"IO"+this.pin+".buttonOnOff();\"><b>IO"+this.pin+"</b>";
+          buttonMaker+="<span id=\"bdgbut"+this.pin+"\" class=\"w3-badge w3-margin-left w3-green\">";
+          buttonMaker+="ON</span></button>";
+          var X=PP.innerHTML;
+          X+=buttonMaker;
+          PP.innerHTML=X;
+           }
+    }  
+    if(this.type==1){
+           var PP=document.getElementById("PwmPanel");
+           var PH=document.getElementById("PwmPanelH");
+            if(PP.style.display === "none"){PP.style.display = "block";PH.style.display = "block";};
+          var PWMMaker="<div class=\"w3-quarter w3-padding\">";
+          PWMMaker+="<div class=\"w3-container w3-dark-grey w3-padding-16 w3-round-xlarge\">";
+          PWMMaker+="<h5 class=\"w3-black w3-round-xlarge\"><b>GPIO "+this.pin+"</b></h5>";
+          PWMMaker+="<span id=\"Hz"+this.pin+"\">"+this.Hz+"</span>Hz <span id=\"bit"+this.pin+"\">"+this.Bit+"</span>Bit<br>";
+          PWMMaker+="<input id=\"pwm"+this.pin+"range\" type=\"range\" max=\"255\" min=\"0\" onchange=\"IO"+this.pin+".PWMsend()\"><br>";
+          PWMMaker+="<h6 id=\"pwm"+this.pin+"v\" class=\"w3-black w3-round-xlarge\">100</h6>";
+          PWMMaker+="</div></div>";
+          var X=PP.innerHTML;
+          X+=PWMMaker;
+          PP.innerHTML=X;
+        }
+    if(this.type==2){
+            var PP=document.getElementById("TouchPanel");
+            var PH=document.getElementById("TouchPanelH");
+            if(PP.style.display === "none"){PP.style.display = "block";PH.style.display = "block";};
+          var buttonMaker="<button id=\"butio"+this.pin+"\" style=\"margin: 10px\" class=\"w3-btn w3-small w3-indigo w3-round-xlarge\" >0";
+          buttonMaker+="<span id=\"bdgbut"+this.pin+"\" class=\"w3-badge w3-margin-left w3-green\">";
+          buttonMaker+="IO"+this.pin+"</span></button>";
+          var X=PP.innerHTML;
+          X+=buttonMaker;
+          PP.innerHTML=X;
+        }
+},
+
+this.visalForm=function(){
+
+      var slct="selected";
+      var N="<p onclick=\"Togel(\'add"+this.pin+"\')\" class=\"w3-btn w3-block w3-black w3-left-align\"><b>I/O "+this.pin+"</b></p>";
+      N+="<div id=\"add"+this.pin+"\" class=\"w3-container w3-hide \">";
+      N+="<p><b>NAME: </b><input style=\"width:100px;\" type=\"text\" name=\"Uname"+this.pin+"\" value=\""+this.Uname+"\"></p>";
+      
+      N+="<p><b>PIN TYPE: </b>";
+      N+="<select style=\"width:150px;\" class=\"w3-select\" name=\"type"+this.pin+"\">";
+        if(this.type==0){ N+="<option value=\"0\" "+slct+">I/O</option>";}else{N+="<option value=\"0\">I/O</option>";}
+      if(this.ADC==0){
+        if(this.type==1){N+="<option value=\"1\" "+slct+">PWM</option>";}
+        else{N+="<option value=\"1\" >PWM</option>";}
+      }
+        if(this.Touch==1){if(this.type==2){ N+="<option value=\"2\" "+slct+">Touch</option>";}else{N+="<option value=\"2\" >Touch</option>";}}
+        if(this.spi==1){if(this.type==3){ N+="<option value=\"3\" "+slct+">SPI</option>";}else{N+="<option value=\"3\" >SPI</option>";}}
+        if(this.ADC==1){if(this.type==6){N+="<option value=\"6\" "+slct+">ADC</option>";}else{N+="<option value=\"6\">ADC</option>";}}
+      N+="</select></P>";
+      
+      N+="<p><b>I/O: </b>";
+      N+="<select style=\"width:150px;\" class=\"w3-select\" name=\"io"+this.pin+"\">";
+        if(this.IOset==0){ N+="<option value=\"0\" "+slct+">INPUT</option>";}else{N+="<option value=\"0\" >INPUT</option>";}
+        if(this.ADC==0){if(this.IOset==1 ){N+="<option value=\"1\" "+slct+">OUTPUT</option>";}else{N+="<option value=\"1\" >OUTPUT</option>";}}
+        if(this.ADC==0){ if(this.IOset==2){ N+="<option value=\"2\" "+slct+">INPUT PULL UP</option>";}else{N+="<option value=\"2\" >INPUT PULL UP</option>";}}
+      N+="</select></p>";
+      
+      if(this.ADC==0){
+      N+="<p><b>PWM: </b>";
+      N+="<b>Hz: </b><input id=\"khzW"+this.pin+"\" onchange=\"IO"+this.pin+".calc();\" type=\"number\" max=\"20000000\" min=\"1\" style=\"width:100px;\"  value=\""+this.Hz+"\" name=\"Hz"+this.pin+"\">";
+      N+="<b>Bit: </b><input id=\"bitW"+this.pin+"\" style=\"width: 50px;\" type=\"number\" max=\"16\" min=\"2\" style=\"width:150px;\" value=\""+this.Bit+"\" name=\"Bit"+this.pin+"\"></p>";
+      }
+
+      if(this.Touch==1){
+      N+="<p><b>Touch: </b>THRESHOLD: <input  style=\"width:50px;\" type=\"number\"  max=\"120\" min=\"1\" name=\"THRESHOLD"+this.pin+"\" value=\""+this.TouchTHRESHOLD+"\"></p>";
+      }
+
+      if(this.ADC==1){
+      N+="<p><b>ADC: </b>Max <input  style=\"width:60px;\" type=\"number\"  max=\"4023\" min=\"0\" name=\"AdcMax"+this.pin+"\" value=\""+this.AdcMax+"\"> ";
+      N+="  Min <input  style=\"width:60px;\" type=\"number\"  max=\"4023\" min=\"0\" name=\"AdcMin"+this.pin+"\" value=\""+this.AdcMin+"\"></p>";
+      }
+
+      N+="<p><b>Interrupt: </b>";
+      N+="<select style=\"width:150px;\" class=\"w3-select \" name=\"RunInterup"+this.pin+"\">";
+      if(this.RunInterup==0){N+="<option value=\"0\" "+slct+"> OFF";}else{N+="<option value=\"0\" > OFF";}
+      if(this.RunInterup==1){N+="<option value=\"1\" "+slct+"> CHANGE";}else{N+="<option value=\"1\" > CHANGE";}
+      if(this.RunInterup==2){N+="<option value=\"2\" "+slct+"> RISING";}else{N+="<option value=\"2\" > RISING";}
+      if(this.RunInterup==3){N+="<option value=\"3\" "+slct+"> FALLING";}else{N+="<option value=\"3\" > FALLING";}
+      if(this.Touch==1){if(this.RunInterup==4){N+="<option value=\"4\" "+slct+"> TOUCH";}else{N+="<option value=\"4\" > TOUCH";}}
+      N+="</select></p>";
+      N+="</div>";
+      var Y=document.getElementById("FormT").innerHTML;
+         Y+=N;
+         document.getElementById("FormT").innerHTML=Y;
+  },
+
+this.calc=function (){
+     var CpuClock=80000000;
+      var elmentName="khzW"+this.pin;
+      var frequency=document.getElementById(elmentName).value;
+      var v1=CpuClock/frequency;
+      var X=Math.floor(Math.log(v1)/Math.log(2));
+      if(X>16){X=16;}
+      elmentName="bitW"+this.pin;
+      document.getElementById(elmentName).max= X;
+      document.getElementById(elmentName).value= X;
+},
+this.pwmconfig=function(){
+  if(this.type==1){
+     var elmentName="pwm"+this.pin+"range";
+     document.getElementById(elmentName).max=this.MaxDute;
+     document.getElementById(elmentName).value=this.PwM;
+     elmentName="Hz"+this.pin;
+     document.getElementById(elmentName).innerHTML=this.Hz;
+     elmentName="bit"+this.pin;
+     document.getElementById(elmentName).innerHTML=this.Bit;
+     elmentName="pwm"+this.pin+"v";
+     document.getElementById(elmentName).innerHTML=this.PwM;
+}
+},
+
+this.PWMrefrs=function(){
+     var elmentName1="pwm"+this.pin+"range";
+     var elmentName2="pwm"+this.pin+"v";
+    document.getElementById(elmentName1).max=this.MaxDute;
+    //document.getElementById(elmentName1).value=this.PwM;
+    document.getElementById(elmentName2).innerHTML=this.PwM;
+
+},
+
+this.PWMsend=function(){
+  var elmentName="pwm"+this.pin+"range"; 
+  var X=document.getElementById(elmentName).value;
+  var valupwmsend="PwM-"+this.pin+"="+X;
+  SocketConnection.send(valupwmsend);
+
+},
+/*
+this.PWMsend=function(){
+  var elmentName="pwm"+this.pin+"range"; 
+  var X=document.getElementById(elmentName).value;
+  var valupwmsend="/gpio?PwM"+this.pin+"="+X;
+  sendget(valupwmsend);
+},
+*/
+this.SetButtonStyle = function (){
+  if(this.type==0){
+  var butin="butio"+this.pin;
+  var badgin="bdgbut"+this.pin;
+  var but=document.getElementById(butin);
+  var badg=document.getElementById(badgin);
+  if(this.IOstaet==1){badg.className="w3-badge w3-margin-left w3-green";badg.innerText="ON";}
+  else{badg.className="w3-badge w3-margin-left w3-red";badg.innerText="OFF";}
+  if(this.IOset==1){but.disabled=false;}
+  else{but.disabled=true;}
+  }
+  if(this.type==2){
+    var butin="butio"+this.pin;
+    var badgin="bdgbut"+this.pin;
+    var but=document.getElementById(butin);
+    var badg=document.getElementById(badgin);
+    but.innerHTML=this.TouchVlue +"<span id=\"bdgbut"+this.pin+"\" class=\"w3-badge w3-margin-left w3-green\">IO"+this.pin+"</span></button>";
+  }
+},
+
+/*
+this.buttonOnOff = function (){
+  var offlink="/gpio?io"+this.pin+"s=0";
+  var onlink="/gpio?io"+this.pin+"s=1";
+  if(this.IOset==1){
+    if(this.IOstaet==1){sendget(offlink);}
+    else{sendget(onlink);}
+  }
+}
+*/
+this.buttonOnOff = function (){
+  var offlink="gpio-"+this.pin+"-s=0";
+  var onlink="gpio-"+this.pin+"-s=1";
+  if(this.IOset==1){
+    if(this.IOstaet==1){SocketConnection.send(offlink);}
+    else{SocketConnection.send(onlink);}
+  }
+}
+
+};
+
+var IO2=new GPIO;
+var IO4=new GPIO;
+var IO5=new GPIO;
+var IO16=new GPIO;
+var IO17=new GPIO;
+var IO25=new GPIO;
+var IO26=new GPIO;
+var IO27=new GPIO;
+var IO19=new GPIO;
+var IO18=new GPIO;
+
+var IO12=new GPIO;
+var IO13=new GPIO;
+var IO14=new GPIO;
+var IO15=new GPIO;
+var IO32=new GPIO;
+var IO33=new GPIO;
+var IO34=new GPIO;
+var IO35=new GPIO;
+var IO36=new GPIO;
+var IO39=new GPIO;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////PWM
+function butio(){
+  if(IO2.type==1 ){IO2.PWMrefrs();}
+  if(IO2.type==0 || IO2.type==2 ){IO2.SetButtonStyle();}
+  if(IO4.type==0 || IO4.type==2){IO4.SetButtonStyle();}
+  if(IO4.type==1){IO4.PWMrefrs();}
+  if(IO5.type==1){IO5.PWMrefrs();}
+  if(IO5.type==0 || IO5.type==2){IO5.SetButtonStyle();}
+   if(IO12.type==0 || IO12.type==2){IO12.SetButtonStyle();}
+  if(IO12.type==1){IO12.PWMrefrs();}
+  if(IO13.type==1){IO13.PWMrefrs();}
+  if(IO13.type==0 || IO13.type==2){IO13.SetButtonStyle();}
+  if(IO14.type==0 || IO14.type==2){IO14.SetButtonStyle();}
+  if(IO14.type==1){IO14.PWMrefrs();}
+  if(IO15.type==1){IO15.PWMrefrs();}
+  if(IO15.type==0 || IO15.type==2){IO15.SetButtonStyle();}
+  if(IO16.type==0 || IO16.type==2){IO16.SetButtonStyle();}
+  if(IO16.type==1){IO16.PWMrefrs();}
+  if(IO17.type==1){IO17.PWMrefrs();}
+  if(IO17.type==0 || IO17.type==17){IO17.SetButtonStyle();}
+  if(IO18.type==0 || IO18.type==2){IO18.SetButtonStyle();}
+  if(IO18.type==1){IO18.PWMrefrs();}
+  if(IO19.type==1){IO19.PWMrefrs();}
+  if(IO19.type==0 || IO19.type==2){IO19.SetButtonStyle();}
+  
+  if(IO25.type==0 || IO25.type==25){IO25.SetButtonStyle();}
+  if(IO25.type==1){IO25.PWMrefrs();}
+  if(IO26.type==1){IO26.PWMrefrs();}
+  if(IO26.type==0 || IO26.type==2){IO26.SetButtonStyle();}
+  if(IO27.type==0 || IO27.type==2){IO27.SetButtonStyle();}
+  if(IO27.type==1){IO27.PWMrefrs();}
+ 
+  //if(IO32.type==1 ){IO32.PWMrefrs();}
+  if(IO32.type==0 || IO32.type==2 ){IO32.SetButtonStyle();}
+  if(IO33.type==0 || IO33.type==2 ){IO33.SetButtonStyle();}
+  if(IO34.type==0 || IO34.type==2 ){IO34.SetButtonStyle();}
+  if(IO35.type==0 || IO35.type==2 ){IO35.SetButtonStyle();}
+  if(IO36.type==0 || IO36.type==2 ){IO36.SetButtonStyle();}
+  if(IO39.type==0 || IO39.type==2 ){IO39.SetButtonStyle();}
+}
+
+function loadgpio(){
+           IO2.SetALLconfig(config.io2);
+           IO4.SetALLconfig(config.io4);
+           IO5.SetALLconfig(config.io5);
+           IO12.SetALLconfig(config.io12);
+           IO13.SetALLconfig(config.io13);
+           IO14.SetALLconfig(config.io14);
+           IO15.SetALLconfig(config.io15);
+           IO16.SetALLconfig(config.io16);
+           IO17.SetALLconfig(config.io17);
+           IO18.SetALLconfig(config.io18);
+           IO19.SetALLconfig(config.io19);
+         
+           IO25.SetALLconfig(config.io25);
+           IO26.SetALLconfig(config.io26);
+           IO27.SetALLconfig(config.io27);
+          
+           
+           IO32.SetALLconfig(config.io32);
+           IO33.SetALLconfig(config.io33);
+           IO34.SetALLconfig(config.io34);
+           IO35.SetALLconfig(config.io35);
+           IO36.SetALLconfig(config.io36);
+           IO39.SetALLconfig(config.io39);
+           
+           IO2.visal();
+           IO4.visal();
+           IO5.visal();
+           IO12.visal();
+           IO13.visal();
+           IO14.visal();
+           IO15.visal();
+           IO16.visal();
+           IO17.visal();
+           IO18.visal();
+           IO19.visal();
+          
+           IO25.visal();
+           IO26.visal();
+           IO27.visal();
+           
+           IO32.visal();
+           IO33.visal();
+           IO34.visal();
+           IO35.visal();
+           IO36.visal();
+           IO39.visal();
+
+           IO2.visalForm();
+           IO4.visalForm();
+           IO5.visalForm();
+           IO12.visalForm();
+           IO13.visalForm();
+           IO14.visalForm();
+           IO15.visalForm();
+           IO16.visalForm();
+           IO17.visalForm();
+           IO18.visalForm();
+           IO19.visalForm();
+          
+           IO25.visalForm();
+           IO26.visalForm();
+           IO27.visalForm();
+           
+           IO32.visalForm();
+           IO33.visalForm();
+           IO34.visalForm();
+           IO35.visalForm();
+           IO36.visalForm();
+           IO39.visalForm();
+
+}
+function rungpio(){
+           IO2.SetALL(jsons.io2);
+           IO4.SetALL(jsons.io4);
+           IO5.SetALL(jsons.io5);
+           IO12.SetALL(jsons.io12);
+           IO13.SetALL(jsons.io13);
+           IO14.SetALL(jsons.io14);
+           IO15.SetALL(jsons.io15);
+           IO16.SetALL(jsons.io16);
+           IO17.SetALL(jsons.io17);
+           IO18.SetALL(jsons.io18);
+           IO19.SetALL(jsons.io19);
+           
+           IO25.SetALL(jsons.io25);
+           IO26.SetALL(jsons.io26);
+           IO27.SetALL(jsons.io27);
+           
+           IO32.SetALL(jsons.io32);
+           IO33.SetALL(jsons.io33);
+           IO34.SetALL(jsons.io34);
+           IO35.SetALL(jsons.io35);
+           IO36.SetALL(jsons.io36);
+           IO39.SetALL(jsons.io39);
+}
+function sendget(htp){
+  var xh = new XMLHttpRequest();
+    xh.onreadystatechange = function(){if (xh.readyState == 4){  if(xh.status == 200){
+      jsons = JSON.parse(xh.responseText);
+      rungpio();
+      butio();
+      }}
+      };
+    xh.open("GET", htp, true);
+    xh.send(null);
+}
+
+function RunDoc() {
+  if(connctionStaet==1){
+  SocketConnection.send('button');
+  }  
+ 
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var hii;
+var XX="ws://";
+XX+=location.hostname;
+XX+=":81/";
+var SocketConnection = new WebSocket(XX, ['arduino']);
+var connctionStaet=0;
+
+
+SocketConnection.onopen = function () {
+  SocketConnection.send('config');
+  connctionStaet=1;                                      
+};
+
+
+SocketConnection.onerror = function (error) {console.log('WebSocket Error ', error);};
+
+SocketConnection.onmessage = function (event) {
+	//console.log('Server: ', event.data);
+  var X= event.data;
+  
+  if(X.startsWith("button")){
+    X=X.replace("button", "");
+    console.log('Server: ', X);
+    jsons = JSON.parse(X);
+    GetSocketMsg();
+  }
+  if(X.startsWith("config")){
+    X=X.replace("config", "");
+    console.log('Server: ', X);
+    config = JSON.parse(X);
+           pageconfig();
+           loadgpio();
+           butio();
+  }
+ 
+};
+
+function GetSocketMsg(){
+  document.getElementById("RSSI").innerHTML=jsons.RSSI;
+  rungpio();
+  butio();
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////start timer
+var mytimer;
+var reloadPeriod = 1000;
+
+function Sstart(){ 
+  mytimer = setInterval(myTimer, reloadPeriod);
+  document.getElementById("Sstop").disabled=false;
+  document.getElementById("Sstart").disabled=true;
+  }
+
+function myTimer() {RunDoc();}
+
+function Sstop(){
+  clearInterval(mytimer);
+  document.getElementById("Sstop").disabled=true;
+  document.getElementById("Sstart").disabled=false;
+  }
+
+function timerset(){
+var XX=document.getElementById("timerSet");
+if(XX.value<200){XX.value=200;}
+reloadPeriod=XX.value;
+Sstop();
+Sstart();
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////page select
+function movepage(page){
+  Sstop();
+  if(page==1){setTimeout( location.replace("index.html"), 800);}
+  if(page==2){setTimeout( location.replace("wifi.html"), 800);}
+  if(page==3){setTimeout( location.replace("mqtt.html"), 800);}
+  //if(page==4){setTimeout( location.replace("GPIO.html"), 800);}
+  if(page==5){setTimeout( location.replace("ADC.html"), 800);}
+  if(page==6){setTimeout( location.replace("serial.html"), 800);}
+  if(page==7){setTimeout( location.replace("sleepmode.html"), 800);}
+  if(page==8){setTimeout( location.replace("info.html"), 800);}
+  if(page==9){setTimeout( location.replace("files.html"), 800);}
+  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function pageconfig(){
+          document.getElementById("IP").innerHTML = "<b>IP: </b>"+ config.IP;
+          document.getElementById("MDNS").innerHTML = "<b>MDNS: </b>http://"+config.MDNS+".local";  
+          document.getElementById("mqttcon").innerHTML ="<b>MQTT: </b>"+ config.MQTTstate;
+          document.getElementById("SSID").innerHTML ="<b>SSID: </b>"+ config.SSID; 
+          document.getElementById("NatLocal").innerHTML = "<b>"+config.NAT+"</b>";  
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function Togel(id) {
+  var x = document.getElementById(id);
+  if (x.className.indexOf("w3-show") == -1) {
+    x.className += " w3-show";
+  } else { 
+    x.className = x.className.replace(" w3-show", "");
+  }
+}
+
+</script>
+<style>
+html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
+</style>
+
+<body onload="onstart()" class="w3-light-grey">
+<!-- Top container -->
+<div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+  <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
+  <span class="w3-bar-item w3-right">Logo</span>
+</div>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
+  <div class="w3-container w3-row">
+    <div class="w3-col s4">
+      <img src="#" class="w3-circle w3-margin-right" style="width:46px">
+    </div>
+    <div class="w3-col s8 w3-bar">
+      <span><strong>ESP32</strong></span><br>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <h5>Dashboard</h5>
+  </div>
+  <div class="w3-bar-block">
+    <button onclick="movepage(1);" class="w3-bar-item w3-button w3-padding ">&ensp; Overview</button>
+    <button onclick="movepage(2);" class="w3-bar-item w3-button w3-padding">&ensp; WiFi</button>
+    <button onclick="movepage(3);" class="w3-bar-item w3-button w3-padding">&ensp; MQTT</button>
+    <button  class="w3-bar-item w3-button w3-padding w3-blue">&ensp; GPIO</button>
+    <button onclick="movepage(5);" class="w3-bar-item w3-button w3-padding ">&ensp; ADC</button>
+    <button onclick="movepage(6);" class="w3-bar-item w3-button w3-padding">&ensp; I2C - SPI - URTA</button>
+    <button onclick="movepage(7);" class="w3-bar-item w3-button w3-padding">&ensp; SLEEP MODE</button>
+    <button onclick="movepage(9);" class="w3-bar-item w3-button w3-padding">&ensp; Files</button>
+    <button onclick="movepage(8);" class="w3-bar-item w3-button w3-padding">&ensp; INFO</button>
+    <br><br>
+  </div>
+</nav>
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <!-- Header -->
+  <header class="w3-container" style="padding-top:22px">
+    <h5><b><i class="fa fa-dashboard"></i> GPIO Settings</b></h5>
+  </header>
+ <!-- Header -->
+
+
+ 
+
+  <div class="w3-bar w3-black">
+
+      <div id="SSID" class="w3-bar-item"></div>
+      <div  class="w3-bar-item"><b>RSSI: </b><span id="RSSI" >65</span><b>dBm</b></div>
+      <div id="NatLocal"class="w3-bar-item"></div>
+      <div id="IP" class="w3-bar-item"></div>
+      <div id="MDNS" class="w3-bar-item"></div>
+      <div id="mqttcon" class="w3-bar-item"></div>
+
+      <div class="w3-bar-item w3-right">
+        <button id="Sstop" class="w3-button w3-tiny w3-white w3-round-xlarge" onclick="Sstop();">&#9724;</button>
+        <button id="Sstart" class="w3-button w3-tiny w3-white w3-round-xlarge" onclick="Sstart();">&#9654;</button>
+        <input id="timerSet"  type="number" style="width: 70px; text-align: center;" min="200" onchange="timerset();" value="1000"> mS
+      </div>
+    </div>
+
+<div class="w3-panel">
+    <p>info info info info</p>
+  </div>
+  <hr>
+
+
+  <h5 style="display: none;" id="ButtonPanelH"><b>Output : </b></h5>
+  <div style="display: none;" id="ButtonPanel" class="w3-row-padding w3-margin-bottom"></div>
+  <h5 style="display: none;" id="InputPanelH"><b>Input : </b></h5>
+  <div style="display: none;" id="InputPanel" class="w3-row-padding w3-margin-bottom"></div>
+  <h5 style="display: none;" id="InputPuPanelH"><b>Input Pull-Up : </b></h5>
+  <div style="display: none;" id="InputPuPanel" class="w3-row-padding w3-margin-bottom"></div>
+  <h5 style="display: none;" id="TouchPanelH"><b>Touch : </b></h5>
+  <div style="display: none;" id="TouchPanel" class="w3-row-padding w3-margin-bottom"></div>
+  <h5 style="display: none;" id="PwmPanelH"><b>PWM : </b></h5> 
+  <div id="PwmPanel" style="text-align: center;display: none;" class="w3-row-padding w3-black w3-margin-bottom"></div>
+  
+
+  <div class="w3-panel">
+  <div class="w3-third">
+      <p>Please enter your password by selecting the SSID.</p>
+       <form method="POST" action="GPIOSET" >
+       <div id="FormT"></div>
+       <br>  
+       <input class="w3-left w3-button w3-black w3-round-xlarge" type="submit" value="Submit">
+    </form>
+  </div>
+  </div>
+  
+  <hr>
+  
+  <!-- Footer -->
+  <footer class="w3-container w3-padding-16 w3-light-grey">
+    <h4>FOOTER</h4>
+    <p>Powered by Gai Lazar</p>
+  </footer>
+  <!-- End page content -->
+</div>
+
+<script type="text/javascript" >
+// Get the Sidebar
+var mySidebar = document.getElementById("mySidebar");
+// Get the DIV with overlay effect
+var overlayBg = document.getElementById("myOverlay");
+// Toggle between showing and hiding the sidebar, and add overlay effect
+function w3_open() {
+  if (mySidebar.style.display === 'block') {
+    mySidebar.style.display = 'none';
+    overlayBg.style.display = "none";
+  } else {
+    mySidebar.style.display = 'block';
+    overlayBg.style.display = "block";
+  }
+}
+// Close the sidebar with the close button
+function w3_close() {
+  mySidebar.style.display = "none";
+  overlayBg.style.display = "none";
+}
+
+function onstart(){
+  setTimeout(Sstart, 1000);
+  }
+
+  
+</script>
+
+</body>
+</html>
