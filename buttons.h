@@ -33,7 +33,7 @@ void longPress1() {
 } 
 void longPressStop1() {
   Serial.println("Button 1 longPress stop");
-    deletpara();
+//    deletpara();
      settingMode = true;
      SAVEconfig();
      ESP.restart();

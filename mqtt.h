@@ -134,3 +134,87 @@ void MqttSetup(){
   client.setCallback(callback);
  // reconnect();
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////mqtt messges
+String valueToMqttMsg(gpio IO){
+  String X;
+  if(IO.type==0 && IO.IOset==0){X="Input:";X+=digitalRead(IO.pin);}
+  if(IO.type==0 && IO.IOset==1){X="Output:";X+=digitalRead(IO.pin);}
+  if(IO.type==0 && IO.IOset==0){X="InputPULLUP:";X+=digitalRead(IO.pin);}
+  if(IO.type==1){X="PWM:";X+=IO.PwM;}
+  if(IO.type==2){X="Touch:";X+=IO.TouchVlue;}
+  if(IO.type==6){X="ADC:";X+=analogRead(IO.pin);}
+  return X;
+}
+
+void MqttSendAll(){
+  SmqttPUB(valueToMqttMsg(IO2),IO2.Uname);
+  SmqttPUB(valueToMqttMsg(IO4),IO4.Uname);
+  SmqttPUB(valueToMqttMsg(IO5),IO5.Uname);
+  SmqttPUB(valueToMqttMsg(IO12),IO12.Uname);
+  SmqttPUB(valueToMqttMsg(IO13),IO13.Uname);
+  SmqttPUB(valueToMqttMsg(IO14),IO14.Uname);
+  SmqttPUB(valueToMqttMsg(IO15),IO15.Uname);
+  SmqttPUB(valueToMqttMsg(IO16),IO16.Uname);
+  SmqttPUB(valueToMqttMsg(IO17),IO17.Uname);
+  SmqttPUB(valueToMqttMsg(IO18),IO18.Uname);
+  SmqttPUB(valueToMqttMsg(IO19),IO19.Uname);
+  SmqttPUB(valueToMqttMsg(IO25),IO25.Uname);
+  SmqttPUB(valueToMqttMsg(IO26),IO26.Uname);
+
+  SmqttPUB(valueToMqttMsg(IO32),IO32.Uname);
+  SmqttPUB(valueToMqttMsg(IO33),IO33.Uname);
+  SmqttPUB(valueToMqttMsg(IO34),IO34.Uname);
+  SmqttPUB(valueToMqttMsg(IO35),IO35.Uname);
+  SmqttPUB(valueToMqttMsg(IO36),IO36.Uname);
+  SmqttPUB(valueToMqttMsg(IO39),IO39.Uname);
+  
+}
+
+
+
+String valueToSend(gpio IO){
+  String X="IO";
+  X+=IO.pin;
+  X+="=";
+  if(IO.RunInterup!=4){X+=digitalRead(IO.pin);}
+  if(IO.RunInterup==4){X+=IO.TouchVlue;}
+  return X;
+}
+
+void interupSendMsg(){
+  setTouchVlue();
+  if(intruptMsgFlag==1 && intruptMsg<millis()){
+    
+         if(mqttConnection){
+            if(IO2.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO2),IO2.Uname);}
+            if(IO4.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO4),IO4.Uname);}
+            if(IO5.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO5),IO5.Uname);}
+            if(IO12.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO12),IO12.Uname);}
+            if(IO13.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO13),IO13.Uname);}
+            if(IO14.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO14),IO14.Uname);}
+            if(IO15.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO15),IO15.Uname);}
+            if(IO16.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO16),IO16.Uname);}
+            if(IO17.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO17),IO17.Uname);}
+            if(IO18.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO18),IO18.Uname);}
+            if(IO19.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO19),IO19.Uname);}
+            
+            if(IO25.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO25),IO25.Uname);}
+            if(IO26.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO26),IO26.Uname);}
+            if(IO27.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO27),IO27.Uname);}
+            if(IO32.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO32),IO32.Uname);}
+            if(IO33.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO33),IO33.Uname);}
+            if(IO34.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO34),IO34.Uname);}
+            if(IO35.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO35),IO35.Uname);}
+            if(IO36.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO36),IO36.Uname);}
+            if(IO39.RunInterup!=0){SmqttPUB(valueToMqttMsg(IO39),IO39.Uname);}
+          
+          }
+    intruptMsgFlag=0;
+    intruptMsg=millis()+1000;
+  }
+  
+  if(intruptMsgFlag==1 && intruptMsg>millis()){intruptMsgFlag=0;}
+  
+}

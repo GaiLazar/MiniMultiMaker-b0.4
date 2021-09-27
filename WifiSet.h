@@ -59,7 +59,6 @@ void setupSTAmode(){
    }
   
   if(WiFi.status() != WL_CONNECTED){
-    deletpara();
     settingMode = true;
     SAVEconfig();
     NETstatus=0;

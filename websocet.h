@@ -15,7 +15,7 @@ void hexdump(const void *mem, uint32_t len, uint8_t cols = 16) {
 
 
 String setjsonn;
-void shortjsons(){
+String shortjsons(){
 
     String json = "all {";
     json += "\"heap\":" + String(ESP.getFreeHeap());
@@ -26,18 +26,11 @@ void shortjsons(){
     setjsonn=json;
 }
 
-void chingIO(gpio IO , int XI){
-   if(XI==1 || XI==0){
-    if(IO.IOset==1){digitalWrite(IO.pin, XI);}
-    if(XI==1){IO.IOstaet=1;}
-     else{IO.IOstaet=0;}
-    SetIoMemory(IO);
-    } 
-   }
 
-void chingpwm(gpio IO, double XX){if(XX>=0 && XX<IO.MaxDute){IO.PwM=XX;} else{IO.PwM=IO.MaxDute;}ledcWrite(IO.ClockNum,IO.PwM);SetIoMemory(IO);}
 
-void sendADC(uint8_t num, uint8_t * payload) {
+
+
+void senddata(uint8_t num, uint8_t * payload) {
    String xx=(char*)payload;
     Serial.println(xx);
     
@@ -66,7 +59,7 @@ void sendADC(uint8_t num, uint8_t * payload) {
     if(xx=="i2c"){
      i2cScan();
         String json = "i2c {";
-        json += "\"i2cscanResolt\":\"" + String(i2cscanResolt)+"\"";
+        json += "\"i2cscanResolt\":" + String(i2cscanResolt)+"\"";
         json += i2cscan;
         json += "}";
     webSocket.sendTXT(num, json);
@@ -102,7 +95,7 @@ void sendADC(uint8_t num, uint8_t * payload) {
       webSocket.sendTXT(num, json);
       return;
       }
-       Serial.println("sriming file");
+       Serial.println("striming file");
 
     while (file.available()) {
       int x=0;  
@@ -151,38 +144,42 @@ if(xx.startsWith("--**deletefile**--:--")){
 ////////////////////////////////////////////////////////output
    
    int XI;
-   if(xx.startsWith("gpio-2-s=")){xx.replace("gpio-2-s=", ""); XI=xx.toInt(); chingIO(IO2 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-4-s=")){xx.replace("gpio-4-s=", ""); XI=xx.toInt(); chingIO(IO4 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-5-s=")){xx.replace("gpio-5-s=", ""); XI=xx.toInt(); chingIO(IO5 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-16-s=")){xx.replace("gpio-16-s=", ""); XI=xx.toInt(); chingIO(IO16 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-17-s=")){xx.replace("gpio-17-s=", ""); XI=xx.toInt(); chingIO(IO17 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-25-s=")){xx.replace("gpio-25-s=", ""); XI=xx.toInt(); chingIO(IO25 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-26-s=")){xx.replace("gpio-26-s=", ""); XI=xx.toInt(); chingIO(IO26 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-27-s=")){xx.replace("gpio-27-s=", ""); XI=xx.toInt(); chingIO(IO27 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-18-s=")){xx.replace("gpio-18-s=", ""); XI=xx.toInt(); chingIO(IO18 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-19-s=")){xx.replace("gpio-19-s=", ""); XI=xx.toInt(); chingIO(IO19 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-12-s=")){xx.replace("gpio-12-s=", ""); XI=xx.toInt(); chingIO(IO12 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-13-s=")){xx.replace("gpio-13-s=", ""); XI=xx.toInt(); chingIO(IO13 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-14-s=")){xx.replace("gpio-14-s=", ""); XI=xx.toInt(); chingIO(IO14 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("gpio-15-s=")){xx.replace("gpio-15-s=", ""); XI=xx.toInt(); chingIO(IO15 , XI); shortjsons();webSocket.sendTXT(num,setjsonn );}
-       
+   if(xx.startsWith("gpio-")){
+   if(xx.startsWith("gpio-2-s=")){xx.replace("gpio-2-s=", ""); XI=xx.toInt(); chingIO(IO2 , XI); }
+   if(xx.startsWith("gpio-4-s=")){xx.replace("gpio-4-s=", ""); XI=xx.toInt(); chingIO(IO4 , XI); }
+   if(xx.startsWith("gpio-5-s=")){xx.replace("gpio-5-s=", ""); XI=xx.toInt(); chingIO(IO5 , XI); }
+   if(xx.startsWith("gpio-16-s=")){xx.replace("gpio-16-s=", ""); XI=xx.toInt(); chingIO(IO16 , XI); }
+   if(xx.startsWith("gpio-17-s=")){xx.replace("gpio-17-s=", ""); XI=xx.toInt(); chingIO(IO17 , XI); }
+   if(xx.startsWith("gpio-25-s=")){xx.replace("gpio-25-s=", ""); XI=xx.toInt(); chingIO(IO25 , XI);}
+   if(xx.startsWith("gpio-26-s=")){xx.replace("gpio-26-s=", ""); XI=xx.toInt(); chingIO(IO26 , XI); }
+   if(xx.startsWith("gpio-27-s=")){xx.replace("gpio-27-s=", ""); XI=xx.toInt(); chingIO(IO27 , XI);}
+   if(xx.startsWith("gpio-18-s=")){xx.replace("gpio-18-s=", ""); XI=xx.toInt(); chingIO(IO18 , XI); }
+   if(xx.startsWith("gpio-19-s=")){xx.replace("gpio-19-s=", ""); XI=xx.toInt(); chingIO(IO19 , XI); }
+   if(xx.startsWith("gpio-12-s=")){xx.replace("gpio-12-s=", ""); XI=xx.toInt(); chingIO(IO12 , XI); }
+   if(xx.startsWith("gpio-13-s=")){xx.replace("gpio-13-s=", ""); XI=xx.toInt(); chingIO(IO13 , XI); }
+   if(xx.startsWith("gpio-14-s=")){xx.replace("gpio-14-s=", ""); XI=xx.toInt(); chingIO(IO14 , XI);}
+   if(xx.startsWith("gpio-15-s=")){xx.replace("gpio-15-s=", ""); XI=xx.toInt(); chingIO(IO15 , XI); }
+   shortjsons();webSocket.sendTXT(num,setjsonn );
+   }
 ///////////////////////////////////////////////////////////////////////////pwm  
    double XX;
-   if(xx.startsWith("PwM-2=")){xx.replace("PwM-2=", ""); XX = xx.toDouble();chingpwm(IO2, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-4=")){xx.replace("PwM-4=", ""); XX = xx.toDouble();chingpwm(IO4, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-5=")){xx.replace("PwM-19=", ""); XX = xx.toDouble();chingpwm(IO5, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-16=")){xx.replace("PwM-16=", ""); XX = xx.toDouble();chingpwm(IO16, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-17=")){xx.replace("PwM-17=", ""); XX = xx.toDouble();chingpwm(IO17, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-25=")){xx.replace("PwM-25=", ""); XX = xx.toDouble();chingpwm(IO25, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-26=")){xx.replace("PwM-26=", ""); XX = xx.toDouble();chingpwm(IO26, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-27=")){xx.replace("PwM-27=", ""); XX = xx.toDouble();chingpwm(IO27, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-18=")){xx.replace("PwM-18=", ""); XX = xx.toDouble();chingpwm(IO18, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-19=")){xx.replace("PwM-19=", ""); XX = xx.toDouble();chingpwm(IO19, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-12=")){xx.replace("PwM-12=", ""); XX = xx.toDouble();chingpwm(IO12, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-13=")){xx.replace("PwM-13=", ""); XX = xx.toDouble();chingpwm(IO13, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-14=")){xx.replace("PwM-14=", ""); XX = xx.toDouble();chingpwm(IO14, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   if(xx.startsWith("PwM-15=")){xx.replace("PwM-15=", ""); XX = xx.toDouble();chingpwm(IO15, XX);shortjsons();webSocket.sendTXT(num,setjsonn );}
-   
+   if(xx.startsWith("PwM-")){
+   if(xx.startsWith("PwM-2=")){xx.replace("PwM-2=", ""); XX = xx.toDouble();chingpwm(IO2, XX);}
+   if(xx.startsWith("PwM-4=")){xx.replace("PwM-4=", ""); XX = xx.toDouble();chingpwm(IO4, XX);}
+   if(xx.startsWith("PwM-5=")){xx.replace("PwM-19=", ""); XX = xx.toDouble();chingpwm(IO5, XX);}
+   if(xx.startsWith("PwM-16=")){xx.replace("PwM-16=", ""); XX = xx.toDouble();chingpwm(IO16, XX);}
+   if(xx.startsWith("PwM-17=")){xx.replace("PwM-17=", ""); XX = xx.toDouble();chingpwm(IO17, XX);}
+   if(xx.startsWith("PwM-25=")){xx.replace("PwM-25=", ""); XX = xx.toDouble();chingpwm(IO25, XX);}
+   if(xx.startsWith("PwM-26=")){xx.replace("PwM-26=", ""); XX = xx.toDouble();chingpwm(IO26, XX);}
+   if(xx.startsWith("PwM-27=")){xx.replace("PwM-27=", ""); XX = xx.toDouble();chingpwm(IO27, XX);}
+   if(xx.startsWith("PwM-18=")){xx.replace("PwM-18=", ""); XX = xx.toDouble();chingpwm(IO18, XX);}
+   if(xx.startsWith("PwM-19=")){xx.replace("PwM-19=", ""); XX = xx.toDouble();chingpwm(IO19, XX);}
+   if(xx.startsWith("PwM-12=")){xx.replace("PwM-12=", ""); XX = xx.toDouble();chingpwm(IO12, XX);}
+   if(xx.startsWith("PwM-13=")){xx.replace("PwM-13=", ""); XX = xx.toDouble();chingpwm(IO13, XX);}
+   if(xx.startsWith("PwM-14=")){xx.replace("PwM-14=", ""); XX = xx.toDouble();chingpwm(IO14, XX);}
+   if(xx.startsWith("PwM-15=")){xx.replace("PwM-15=", ""); XX = xx.toDouble();chingpwm(IO15, XX);}
+   shortjsons();webSocket.sendTXT(num,setjsonn );
+   }
 }
 
 
@@ -205,7 +202,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             break;
         case WStype_TEXT:
          //   Serial.printf("[%u] get Text: %s\n", num, payload);
-             sendADC(num,payload);
+             senddata(num,payload);
             // send message to client
              //webSocket.sendTXT(num, json);
             
